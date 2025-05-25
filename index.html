@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Overthinking Remaja</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f4fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
+    }
+
+    h1, h2 {
+      color: #1976d2;
+      text-align: center;
+    }
+
+    .question {
+      margin-bottom: 20px;
+    }
+
+    .question label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1976d2;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbdefb;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .btn {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      display: block;
+      margin: 20px auto 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0d47a1;
+    }
+
+    .line {
+      height: 4px;
+      background: linear-gradient(to right, #1976d2, #64b5f6);
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .loading, .result {
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="page1">
+  <h1>Yuk, Kenali Dirimu!</h1>
+  <p>Masukkan nama lengkapmu terlebih dahulu.</p>
+  <div class="line"></div>
+  <input type="text" id="nama" placeholder="Nama kamu...">
+  <button class="btn" onclick="goToPage(2)">Lanjut</button>
+</div>
+
+<div class="container" id="page2" style="display:none">
+  <h2>Kuis: Seberapa Sering Kamu Overthinking?</h2>
+  <div class="line"></div>
+  <form id="quizForm">
+    <div class="question">
+      <label>1. Apakah kamu sulit tidur karena memikirkan banyak hal?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>2. Apakah kamu sering memikirkan ulang percakapan yang sudah berlalu?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>3. Apakah kamu sering merasa takut membuat keputusan?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>4. Apakah kamu merasa cemas jika belum mendapat jawaban dari seseorang?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>5. Apakah kamu sering memikirkan skenario terburuk?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>6. Apakah kamu merasa overthinking mempengaruhi hari-harimu?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>7. Apakah kamu merasa tidak percaya diri karena terlalu banyak berpikir?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>8. Apakah kamu pernah merasa burnout karena terlalu banyak mikir?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>9. Apakah kamu sering berasumsi buruk terhadap sesuatu?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <div class="question">
+      <label>10. Apakah kamu pernah merasa kesepian dalam pikiran sendiri?</label>
+      <select required><option>Pilih</option><option>Sering</option><option>Kadang</option><option>Jarang</option></select>
+    </div>
+    <button class="btn" type="button" onclick="goToPage(3)">Kirim Jawaban</button>
+  </form>
+</div>
+
+<div class="container loading" id="page3">
+  <h2>Menganalisis Jawabanmu...</h2>
+  <div class="line"></div>
+  <p>Tunggu sebentar ya, kami sedang memproses hasilnya ✨</p>
+</div>
+
+<div class="container result" id="page4">
+  <h2>Hai <span id="namaHasil"></span>!</h2>
+  <div class="line"></div>
+  <p>Hasilmu menunjukkan bahwa kamu termasuk tipe yang <b>sering overthinking</b>.</p>
+  <p><b>Rekomendasi:</b></p>
+  <ul>
+    <li>Luangkan waktu untuk journaling sebelum tidur 📝</li>
+    <li>Coba meditasi dengan aplikasi seperti Headspace atau Insight Timer 🧘</li>
+    <li>Batasi waktu penggunaan media sosial 📱</li>
+    <li>Bicarakan pikiranmu dengan teman yang dipercaya 🤝</li>
+    <li>Baca buku "Overthinking is Not Helping" oleh Sarah Knight 📖</li>
+  </ul>
+</div>
+
+<script>
+  function goToPage(page) {
+    document.querySelectorAll('.container').forEach(c => c.style.display = 'none');
+    document.getElementById('page' + page).style.display = 'block';
+
+    if (page === 3) {
+      setTimeout(() => {
+        document.getElementById('namaHasil').innerText = document.getElementById('nama').value || 'Teman';
+        goToPage(4);
+      }, 2000);
+    }
+  }
+</script>
+
+</body>
+</html>
