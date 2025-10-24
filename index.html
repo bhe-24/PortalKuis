@@ -10,8 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     
-    <!-- --- LIBRARY PDF BARU --- -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- --- LIBRARY PDF BARU (HANYA jsPDF) --- -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- --- Akhir Library PDF --- -->
 
@@ -901,121 +900,181 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('back-to-dashboard-from-review').onclick = renderDashboardView;
     }
 
-    // --- FUNGSI BARU: Generate PDF dengan jsPDF & html2canvas ---
+    // --- FUNGSI PDF NATIVE (BUKAN SCREENSHOT) ---
     async function generateReviewPDF(session, score) {
-        showLoading('Membuat PDF, mohon tunggu...');
+        showLoading('Membuat PDF Teks (Native)...');
         
         const { jsPDF } = window.jspdf;
-        const reviewContent = document.getElementById('review-content-for-pdf');
+        const doc = new jsPDF('p', 'mm', 'a4'); // portrait, milimeter, A4
         
-        // URL Logo (Pastikan link langsung ke gambar .png)
         const logoCendekiaUrl = 'https://i.imgur.com/5Srjyo4.png';
         const logoCapBasahUrl = 'https://i.imgur.com/YvrNYRw.png';
         
-        try {
-            const canvas = await html2canvas(reviewContent, {
-                scale: 2, // Resolusi lebih tinggi
-                useCORS: true, // Wajib untuk gambar eksternal
-                allowTaint: true
-            });
-            
-            const imgData = canvas.toDataURL('image/png');
-            const doc = new jsPDF('p', 'mm', 'a4'); // mode portrait, milimeter, A4
-            
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const margin = 15;
-            const contentWidth = pageWidth - (margin * 2);
-            
-            // Hitung rasio gambar
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = imgHeight / imgWidth;
-            const contentHeight = contentWidth * ratio;
+        // --- Helper untuk Lika-Liku jsPDF ---
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+        let y = margin; // Posisi Y vertikal saat ini
 
-            // --- Halaman 1: Judul, Logo, dan Hasil Review ---
-            // Logo Cendekia Aksara
-            // (Catatan: addImage(url) bisa gagal karena CORS. Jika gagal, logo tidak akan muncul)
-            try {
-                doc.addImage(logoCendekiaUrl, 'PNG', margin, 10, 30, 30);
-            } catch (e) { console.warn("Gagal memuat logo Cendekia: " + e.message); }
-            
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor("#003366"); // <-- DIUBAH: dari var(--secondary-color)
-            doc.text('Hasil Kuis: Cendekia Aksara', pageWidth / 2, 25, { align: 'center' });
-            
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor("#343a40"); // <-- DIUBAH: dari var(--dark-text)
-            doc.text(`Nama Siswa: ${currentUserData.name}`, margin, 50);
-            doc.text(`Judul Kuis: ${session.data.title}`, margin, 57);
-            doc.text(`Nilai Akhir: ${score}`, margin, 64);
-            doc.line(margin, 70, pageWidth - margin, 70); // Garis pemisah
-
-            // Tambahkan gambar canvas (review soal)
-            let heightLeft = contentHeight;
-            let position = 75; // Posisi Y awal
-
-            doc.addImage(imgData, 'PNG', margin, position, contentWidth, contentHeight);
-            heightLeft -= (pageHeight - 75 - margin); // Kurangi tinggi halaman pertama
-
-            // Penanganan jika review lebih dari 1 halaman
-            while (heightLeft > 0) {
+        // Fungsi untuk cek halaman baru
+        function checkPageBreak(requiredHeight = 10) {
+            if (y + requiredHeight > pageHeight - margin) {
                 doc.addPage();
-                position = -pageHeight + margin; // Posisi Y negatif untuk memotong gambar
-                doc.addImage(imgData, 'PNG', margin, position, contentWidth, contentHeight);
-                heightLeft -= pageHeight;
+                y = margin;
             }
+        }
+        // --- Akhir Helper ---
 
-            // --- Halaman 2: Lembar Pengesahan ---
-            doc.addPage();
+        try {
+            // --- Halaman 1: Judul, Logo, dan Info ---
+            try {
+                // Tambahkan logo. Butuh CORS, jadi kita bungkus try-catch
+                doc.addImage(logoCendekiaUrl, 'PNG', margin, y, 25, 25);
+            } catch (e) { console.warn("Gagal memuat logo Cendekia (mungkin karena CORS)."); }
+            
             doc.setFontSize(18);
             doc.setFont('helvetica', 'bold');
-            doc.text('Lembar Pengesahan', pageWidth / 2, 30, { align: 'center' });
+            doc.setTextColor("#003366"); // Biru Tua
+            doc.text('HASIL REVIEW KUIS', pageWidth / 2, y + 10, { align: 'center' });
+            doc.text('Cendekia Aksara', pageWidth / 2, y + 18, { align: 'center' });
+            y += 35; // Pindah ke bawah header
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor("#343a40"); // Teks Gelap
+            doc.text(`Nama Siswa:`, margin, y);
+            doc.setFont('helvetica', 'bold');
+            doc.text(currentUserData.name, margin + 30, y);
+            y += 7;
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Judul Kuis:`, margin, y);
+            doc.setFont('helvetica', 'bold');
+            doc.text(session.data.title, margin + 30, y);
+            y += 7;
+
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nilai Akhir:`, margin, y);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor("#005a9c"); // var(--primary-color)
+            doc.text(String(score), margin + 30, y);
+            y += 10;
+            
+            doc.setDrawColor(233, 236, 239); // var(--light-gray)
+            doc.line(margin, y, pageWidth - margin, y); // Garis pemisah
+            y += 10;
+
+            // --- Loop Soal dan Jawaban (Konten Utama) ---
+            session.data.questions.forEach((q, index) => {
+                const userAnswerIndex = session.answers[index];
+                const correctAnswerIndex = parseInt(q.correctAnswerIndex);
+                
+                checkPageBreak(20); // Cek ruang untuk minimal 1 soal
+
+                // Render Teks Pertanyaan
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor("#003366"); // var(--secondary-color)
+                const questionLines = doc.splitTextToSize(`${index + 1}. ${q.questionText}`, contentWidth);
+                doc.text(questionLines, margin, y);
+                y += (questionLines.length * 4.5) + 5; // (Tinggi font * 1.2 * baris) + padding
+
+                // Render Opsi
+                doc.setFontSize(10);
+                q.options.forEach((optionText, optIndex) => {
+                    const prefix = String.fromCharCode(97 + optIndex);
+                    const optionString = `${prefix}. ${optionText}`;
+                    const optionLines = doc.splitTextToSize(optionString, contentWidth - 5); // Beri indent
+                    
+                    const rectHeight = (optionLines.length * 4.5) + 6; // Tinggi kotak
+                    checkPageBreak(rectHeight + 2); // Cek ruang untuk 1 opsi
+
+                    const isCorrect = (optIndex === correctAnswerIndex);
+                    const isUserWrong = (optIndex === userAnswerIndex && userAnswerIndex !== correctAnswerIndex);
+
+                    // Gambar kotak latar belakang
+                    if (isCorrect) {
+                        doc.setFillColor(224, 247, 236); // #e6f7ec
+                        doc.setDrawColor(40, 167, 69); // var(--success-color)
+                        doc.setFont('helvetica', 'bold');
+                    } else if (isUserWrong) {
+                        doc.setFillColor(253, 238, 238); // #fdeeee
+                        doc.setDrawColor(220, 53, 69); // var(--danger-color)
+                        doc.setFont('helvetica', 'normal');
+                    } else {
+                        doc.setFillColor(253, 253, 253); // #fdfdfd
+                        doc.setDrawColor(233, 236, 239); // var(--light-gray)
+                        doc.setFont('helvetica', 'normal');
+                    }
+                    
+                    doc.rect(margin, y, contentWidth, rectHeight, 'FD'); // Fill and Draw
+                    
+                    // Tulis teks opsi
+                    doc.setTextColor("#343a40"); // var(--dark-text)
+                    doc.text(optionLines, margin + 3, y + 5); // Padding internal
+
+                    y += rectHeight + 2; // Pindah Y ke bawah kotak + 2mm padding
+                });
+                
+                y += 5; // Padding antar soal
+            });
+
+            // --- Halaman Terakhir: Lembar Pengesahan ---
+            doc.addPage();
+            y = margin; // Reset Y
+            
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor("#003366");
+            doc.text('Lembar Pengesahan', pageWidth / 2, y + 15, { align: 'center' });
+            y += 35;
             
             doc.setFontSize(12);
             doc.setFont('helvetica', 'normal');
-            doc.text('Dokumen ini adalah hasil review kuis yang telah dikerjakan oleh siswa', pageWidth / 2, 50, { align: 'center' });
-            doc.text('dan telah diverifikasi secara otomatis oleh sistem.', pageWidth / 2, 57, { align: 'center' });
+            doc.setTextColor("#343a40");
+            doc.text('Dokumen ini adalah hasil review kuis siswa dan telah diverifikasi', pageWidth / 2, y, { align: 'center' });
+            y += 7;
+            doc.text('secara otomatis oleh sistem Cendekia Aksara.', pageWidth / 2, y, { align: 'center' });
+            y += 14;
             
             const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            doc.text(`Diverifikasi pada: ${today}`, pageWidth / 2, 80, { align: 'center' });
+            doc.text(`Diverifikasi pada: ${today}`, pageWidth / 2, y, { align: 'center' });
+            y += 20;
             
             // Tanda Tangan dan Cap
-            const capX = pageWidth / 2 - 25; // Posisi X Cap
-            const capY = 100; // Posisi Y Cap
+            const capSize = 40;
+            const capX = pageWidth / 2 - (capSize / 2);
             
-            // Cap Basah
-            // (Catatan: addImage(url) bisa gagal karena CORS)
             try {
-                doc.addImage(logoCapBasahUrl, 'PNG', capX, capY, 50, 50);
-            } catch (e) { console.warn("Gagal memuat cap basah: " + e.message); }
+                doc.addImage(logoCapBasahUrl, 'PNG', capX, y, capSize, capSize);
+            } catch (e) { console.warn("Gagal memuat cap basah (mungkin karena CORS)."); }
+            y += capSize; // Pindah Y ke bawah cap
 
-            // Tanda Tangan Digital "Aksa"
             doc.setFont('times', 'italic');
             doc.setFontSize(26);
-            doc.setTextColor(20, 20, 180); // Warna biru tanda tangan
-            doc.text('Aksa', pageWidth / 2, 130, { align: 'center' });
+            doc.setTextColor(20, 20, 180); // Biru
+            doc.text('Aksa', pageWidth / 2, y - 10, { align: 'center' }); // Tumpang tindih sedikit
+            y += 10;
             
-            // Nama Terang
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(12);
-            doc.setTextColor("#343a40"); // <-- DIUBAH: dari var(--dark-text)
-            doc.text('( Aksa, Kawan Cendekia )', pageWidth / 2, 145, { align: 'center' });
+            doc.setTextColor("#343a40");
+            doc.text('( Aksa, Kawan Cendekia )', pageWidth / 2, y, { align: 'center' });
 
             // Simpan PDF
-            doc.save(`Hasil_Kuis_${session.data.title.replace(/\s+/g, '_')}_${currentUserData.name}.pdf`);
+            doc.save(`Review_Kuis_${session.data.title.replace(/\s+/g, '_')}_${currentUserData.name}.pdf`);
 
             // Update UI setelah sukses
             hideLoading();
-            showModal('Sukses!', 'File PDF berhasil dibuat dan diunduh.');
+            showModal('Sukses!', 'File PDF (Teks Native) berhasil dibuat dan diunduh.');
             document.getElementById('download-pdf-btn').disabled = true;
             document.getElementById('download-pdf-btn').textContent = 'PDF Telah Diunduh';
             document.getElementById('back-to-dashboard-from-review').classList.remove('hidden');
 
         } catch (error) {
-            console.error('Gagal membuat PDF:', error);
+            console.error('Gagal membuat PDF Teks Native:', error);
             hideLoading();
             showModal('Error', 'Gagal membuat file PDF. Silakan coba lagi.');
         }
@@ -1249,5 +1308,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
 
 
