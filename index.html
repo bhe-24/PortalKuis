@@ -36,7 +36,7 @@
                             <input type="password" id="login-password" required placeholder="******">
                             <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
                         </div>
-                        <div class="forgot-pass" onclick="openModal('modal-forgot')">Lupa Password?</div>
+                        <div class="forgot-pass" onclick="handleForgotPassword()">Lupa Password?</div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">MASUK</button>
@@ -75,32 +75,6 @@
 
         </div>
     </div>
-
-    <div id="modal-forgot" class="custom-modal hidden">
-        <div class="modal-content">
-            <h3>Reset Password</h3>
-            <p>Masukkan email Anda. Kami akan mengirimkan link untuk mereset kata sandi.</p>
-            <input type="email" id="forgot-email" class="modal-input" placeholder="Masukkan email akun...">
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('modal-forgot')">Batal</button>
-                <button class="btn btn-primary" id="btn-send-reset">Kirim Link</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-alert" class="custom-modal hidden">
-        <div class="modal-content text-center">
-            <div id="alert-icon" style="font-size: 3em; margin-bottom: 10px;"></div>
-            <h3 id="alert-title">Judul</h3>
-            <p id="alert-msg">Pesan...</p>
-            <button class="btn btn-primary" onclick="closeModal('modal-alert')" style="width: 100%; margin-top: 15px;">OK</button>
-        </div>
-    </div>
-
-    <div id="loading-overlay" class="hidden">
-        <div class="spinner"></div>
-        <p>Memproses...</p>
-    </div>
-
+    
     <script src="js/config.js"></script> <script src="js/auth.js"></script>   </body>
 </html>
