@@ -1,52 +1,42 @@
 // js/dashboard.js
 
-// 1. Tampilkan Tanggal Hari Ini
-const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-document.getElementById('date-display').textContent = new Date().toLocaleDateString('id-ID', dateOptions);
+// 1. Set Tanggal (Pastikan elemen ada sebelum diisi)
+document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('date-display');
+    if (dateEl) {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = new Date().toLocaleDateString('id-ID', options);
+    }
+});
 
-// 2. Cek Login
+// 2. Cek Login & Ambil Data
 auth.onAuthStateChanged(user => {
     if (user) {
         loadUserProfile(user.uid);
     } else {
-        // Kalau tidak login, tendang ke login
         window.location.href = 'index.html';
     }
 });
 
-// 3. Ambil Data Profil
 function loadUserProfile(uid) {
-    // Tampilkan loading sebentar
-    const loading = document.getElementById('loading-overlay');
-    if(loading) loading.classList.remove('hidden');
-
     db.collection('users').doc(uid).get().then(doc => {
-        if(loading) loading.classList.add('hidden');
-
         if (doc.exists) {
             const data = doc.data();
-            
-            // Masukkan Nama ke HTML
-            // Pecah nama depan biar lebih akrab (Misal: "Budi Santoso" jadi "Halo, Budi")
-            const firstName = data.name.split(' ')[0];
-            document.getElementById('student-name').textContent = `Halo, ${firstName}!`;
+            const nameEl = document.getElementById('student-name');
+            // Animasi loading nama hilang, ganti nama asli
+            if(nameEl) {
+                const firstName = data.name.split(' ')[0]; // Ambil nama depan saja
+                nameEl.textContent = `Halo, ${firstName}!`;
+            }
         }
-    }).catch(err => {
-        console.error(err);
-        if(loading) loading.classList.add('hidden');
-    });
+    }).catch(err => console.error("Gagal ambil data:", err));
 }
 
-// 4. Logout
-document.getElementById('btn-logout').addEventListener('click', () => {
-    document.getElementById('btn-logout').addEventListener('click', async () => {
-    // Fungsi showConfirm mengembalikan true/false (Promise)
-    const yakin = await showConfirm("Konfirmasi Logout", "Apakah Anda yakin ingin keluar dari aplikasi?");
-    
+// 3. Logout dengan Modal Baru
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    // Pastikan fungsi showConfirm dari config.js sudah terpanggil
+    const yakin = await showConfirm("Konfirmasi Keluar", "Apakah Anda yakin ingin mengakhiri sesi ini?");
     if (yakin) {
-        showLoading();
-        auth.signOut().then(() => {
-            window.location.href = 'index.html';
-        });
+        auth.signOut().then(() => window.location.href = 'index.html');
     }
 });
