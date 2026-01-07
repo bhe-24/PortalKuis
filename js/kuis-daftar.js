@@ -12,17 +12,17 @@ async function loadKuisList(studentUid) {
     const listContainer = document.getElementById('kuis-list-container');
     
     try {
-        // 1. Ambil Semua Kuis (Tipe 'Kuis')
+        // 1. Ambil Data Kuis
         const kuisSnapshot = await db.collection('quizzes')
-            .where('type', '==', 'Kuis') // Filter hanya tipe Kuis
+            .where('type', '==', 'Kuis')
             .get();
 
-        // 2. Ambil Riwayat Pengerjaan Siswa Ini
+        // 2. Ambil Riwayat (Untuk cek mana yang sudah dikerjakan)
         const submissionSnapshot = await db.collection('quiz_submissions')
             .where('studentUid', '==', studentUid)
             .get();
 
-        // Buat Peta (Map) agar mudah mengecek: "Kuis ID ini nilainya berapa?"
+        // Mapping Data Submission
         const submissions = {};
         submissionSnapshot.forEach(doc => {
             const data = doc.data();
@@ -30,53 +30,73 @@ async function loadKuisList(studentUid) {
         });
 
         // 3. Render Tampilan
-        listContainer.innerHTML = ''; // Bersihkan loading text
+        listContainer.innerHTML = ''; // Bersihkan loading
 
         if (kuisSnapshot.empty) {
-            listContainer.innerHTML = '<p style="text-align:center;">Belum ada kuis yang tersedia.</p>';
+            listContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: white; border-radius: 15px;">
+                    <i class="fa-solid fa-box-open" style="font-size: 3em; color: #ddd; margin-bottom: 15px;"></i>
+                    <p>Belum ada kuis yang tersedia saat ini.</p>
+                </div>`;
             return;
         }
 
         kuisSnapshot.forEach(doc => {
             const kuis = doc.data();
             const kuisId = doc.id;
-            const userScore = submissions[kuisId]; // Nilai (undefined jika belum dikerjakan)
+            const userScore = submissions[kuisId]; // Nilai (undefined jika belum)
             const isDone = userScore !== undefined;
 
-            // Buat elemen Kartu HTML
+            // Buat Elemen Kartu
             const card = document.createElement('div');
-            card.className = 'item-card'; // Pakai class CSS kita
             
-            // Tentukan isi kartu berdasarkan status (Sudah/Belum)
+            // Logika Tampilan (Sudah vs Belum)
             if (isDone) {
-                // Tampilan SUDAH MENGERJAKAN
-                card.classList.add('clickable'); // Supaya efek hover jalan
-                card.style.borderColor = 'var(--success-color)'; // Border hijau
+                // --- SUDAH DIKERJAKAN ---
+                card.className = 'quiz-card done';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <h3 style="margin:0;">${kuis.title}</h3>
-                        <span class="tag tag-green"><i class="fa-solid fa-check"></i> Selesai</span>
+                    <div class="q-header">
+                        <div>
+                            <h3 class="q-title">${kuis.title}</h3>
+                            <p class="q-subject">${kuis.subject}</p>
+                        </div>
+                        <div class="q-icon"><i class="fa-solid fa-check"></i></div>
                     </div>
-                    <p>${kuis.subject}</p>
-                    <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
-                    <div style="text-align: center;">
-                        <p style="margin:0;">Nilai Anda:</p>
-                        <h2 style="color: var(--success-color); font-size: 2em; margin: 5px 0;">${userScore}</h2>
+                    
+                    <div class="q-meta">
+                        <span><i class="fa-regular fa-clock"></i> Selesai</span>
+                        <span><i class="fa-solid fa-list-ol"></i> ${kuis.questions.length} Soal</span>
+                    </div>
+
+                    <div class="q-action">
+                        <div class="status-done">
+                            Nilai: <span style="font-size: 1.2em;">${userScore}</span>
+                        </div>
                     </div>
                 `;
-                // Kalau diklik, mungkin nanti kita buat fitur lihat detail/review (Next Project)
+                // Klik kartu untuk info
                 card.onclick = () => alert(`Anda sudah menyelesaikan kuis ini dengan nilai ${userScore}.`);
+                card.style.cursor = 'pointer';
+
             } else {
-                // Tampilan BELUM MENGERJAKAN
+                // --- BELUM DIKERJAKAN (BARU) ---
+                card.className = 'quiz-card';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <h3 style="margin:0;">${kuis.title}</h3>
-                        <span class="tag tag-orange">Belum Dikerjakan</span>
+                    <div class="q-header">
+                        <div>
+                            <h3 class="q-title">${kuis.title}</h3>
+                            <p class="q-subject">${kuis.subject}</p>
+                        </div>
+                        <div class="q-icon"><i class="fa-solid fa-pen"></i></div>
                     </div>
-                    <p><strong>Mapel:</strong> ${kuis.subject}</p>
-                    <p><i class="fa-regular fa-clock"></i> ${kuis.duration} Menit &nbsp;|&nbsp; <i class="fa-solid fa-list-ol"></i> ${kuis.questions.length} Soal</p>
-                    <div style="margin-top: 15px;">
-                        <a href="kuis-pre.html?id=${kuisId}" class="btn btn-primary" style="text-decoration:none;">
+                    
+                    <div class="q-meta">
+                        <span><i class="fa-regular fa-clock"></i> ${kuis.duration} Menit</span>
+                        <span><i class="fa-solid fa-list-ol"></i> ${kuis.questions.length} Soal</span>
+                    </div>
+
+                    <div class="q-action">
+                        <a href="kuis-pre.html?id=${kuisId}" class="btn-start">
                             Mulai Mengerjakan <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
@@ -88,6 +108,6 @@ async function loadKuisList(studentUid) {
 
     } catch (error) {
         console.error("Error memuat kuis:", error);
-        listContainer.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat data. Periksa koneksi internet.</p>';
+        listContainer.innerHTML = `<p style="text-align:center; color:red; grid-column: 1/-1;">Gagal memuat data. Periksa koneksi.</p>`;
     }
 }
