@@ -567,3 +567,75 @@ a { text-decoration: none; color: inherit; }
     .welcome-text h1 { font-size: 1.8em; }
     .menu-grid { grid-template-columns: 1fr; }
 }
+
+/* --- TAMBAHAN KHUSUS KUIS CARD --- */
+
+/* Grid Container untuk Kuis */
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Responsif Otomatis */
+    gap: 25px;
+    margin-top: 20px;
+}
+
+/* Desain Kartu Kuis */
+.quiz-card {
+    background: white;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.quiz-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 15px 30px rgba(0, 90, 156, 0.15);
+}
+
+/* Garis Warna di Atas Kartu (Hiasan) */
+.quiz-card::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+    background: var(--primary);
+}
+.quiz-card.done::before { background: var(--success); } /* Kalau sudah dikerjakan jadi hijau */
+
+/* Header Kartu */
+.q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+.q-icon {
+    width: 50px; height: 50px; background: #e3f2fd; color: var(--primary);
+    border-radius: 12px; display: flex; justify-content: center; align-items: center;
+    font-size: 1.5em;
+}
+.quiz-card.done .q-icon { background: #e6f7ec; color: var(--success); }
+
+/* Judul & Mapel */
+.q-title { margin: 0; font-size: 1.2em; font-weight: 700; color: var(--text-main); }
+.q-subject { margin: 5px 0 0; color: var(--text-muted); font-size: 0.9em; font-weight: 500; }
+
+/* Info Meta (Waktu & Soal) */
+.q-meta {
+    display: flex; gap: 15px; margin: 20px 0;
+    border-top: 1px dashed #eee; border-bottom: 1px dashed #eee;
+    padding: 10px 0; font-size: 0.9em; color: #666;
+}
+.q-meta i { color: var(--primary); margin-right: 5px; }
+
+/* Tombol Aksi */
+.q-action { margin-top: auto; } /* Dorong tombol ke paling bawah */
+.btn-start {
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    background: var(--primary); color: white; font-weight: 600; cursor: pointer;
+    transition: 0.2s; text-decoration: none; display: block; text-align: center;
+}
+.btn-start:hover { background: var(--secondary); box-shadow: 0 5px 15px rgba(0, 90, 156, 0.3); }
+
+/* Status Selesai */
+.status-done {
+    text-align: center; color: var(--success); font-weight: 600;
+    background: #e6f7ec; padding: 10px; border-radius: 10px;
+}
