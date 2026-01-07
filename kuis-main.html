@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Berlangsung - Cendekia Aksara</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="ujian-header-bar">
+            <h2 id="question-badge">Soal #1</h2>
+            
+            <div id="timer-display" class="timer-display">00:00:00</div>
+            
+            <button id="btn-giveup" class="btn btn-danger btn-sm" style="width:auto; padding: 8px 15px;">
+                <i class="fa-solid fa-flag"></i> Nyerah/Keluar
+            </button>
+        </div>
+
+        <div id="nav-grid-container"></div>
+
+        <div id="question-container">
+            <div class="item-card" style="text-align: center; padding: 40px;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+                <p>Memuat soal...</p>
+            </div>
+        </div>
+
+        <div class="ujian-navigation-btns">
+            <button id="btn-prev" class="btn btn-secondary" style="width: auto;" disabled>
+                <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+            </button>
+            
+            <button id="btn-flag" class="btn btn-warning" style="width: auto;">
+                <i class="fa-regular fa-flag"></i> Ragu-ragu
+            </button>
+            
+            <button id="btn-next" class="btn" style="width: auto;">
+                Lanjut <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="progress-spinner"></div>
+        <p>Memproses...</p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/kuis-main.js"></script>
+
+</body>
+</html>
