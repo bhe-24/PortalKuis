@@ -9,22 +9,52 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
         .subtitle-yellow { color: #ffe082 !important; font-weight: 500; margin-top: 5px; font-size: 1em; }
-        .history-card { background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; animation: fadeIn 0.5s ease; }
+        
+        .history-card { 
+            background: white; border-radius: 15px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; 
+            animation: fadeIn 0.5s ease; 
+        }
+        
         .history-table { width: 100%; border-collapse: collapse; }
-        .history-table th { background: #f8f9fa; color: #333; font-weight: 600; padding: 15px 20px; text-align: left; border-bottom: 2px solid #eee; }
-        .history-table td { padding: 15px 20px; border-bottom: 1px solid #f1f1f1; color: #555; vertical-align: middle; }
+        
+        /* HEADER TABEL BIRU (Sesuai Request) */
+        .history-table th { 
+            background: var(--primary); /* Biru Cendekia */
+            color: white; 
+            font-weight: 600; padding: 15px 20px; text-align: left; 
+        }
+        
+        .history-table td { 
+            padding: 15px 20px; border-bottom: 1px solid #f1f1f1; 
+            color: #555; vertical-align: middle; 
+        }
+        
         .history-table tr:last-child td { border-bottom: none; }
+        .history-table tr:hover { background-color: #fcfcfc; }
+
         .score-pill { display: inline-block; padding: 6px 15px; border-radius: 50px; font-weight: 700; font-size: 0.9em; min-width: 40px; text-align: center; }
         .score-high { background: #e6f7ec; color: #28a745; border: 1px solid #28a745; }
         .score-mid  { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .score-low  { background: #fdeeee; color: #dc3545; border: 1px solid #dc3545; }
+        
         .state-box { text-align: center; padding: 50px 20px; color: #777; }
         .state-box i { font-size: 3em; margin-bottom: 15px; color: #ddd; }
+
+        /* Tombol Kecil di Tabel */
+        .btn-sm-download {
+            background: #fff; border: 1px solid var(--primary); color: var(--primary);
+            padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em;
+            transition: 0.2s; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-sm-download:hover { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -59,13 +89,20 @@
 
     <script src="js/config.js"></script>
     <script>
+        let currentUserName = "Siswa"; // Simpan nama siswa untuk PDF
+
         auth.onAuthStateChanged(async user => {
             if (!user) { window.location.href = 'index.html'; return; }
+            
+            // Ambil nama user dulu untuk keperluan PDF
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if(doc.exists) currentUserName = doc.data().name;
+            });
+
             const container = document.getElementById('history-container');
 
             try {
-                // --- KUNCI PERBAIKAN DI SINI ---
-                // Kita HAPUS .orderBy() agar tidak butuh Index Firebase
+                // Ambil Data (Tanpa OrderBy agar aman dari error index)
                 const snapshot = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .get();
@@ -75,23 +112,50 @@
                     return;
                 }
 
-                // Kita urutkan manual pakai JavaScript (Bukan Firebase)
+                // Urutkan Manual (Terbaru di atas)
                 let allData = [];
-                snapshot.forEach(doc => allData.push(doc.data()));
+                snapshot.forEach(doc => {
+                    // Masukkan ID Dokumen juga
+                    allData.push({ id: doc.id, ...doc.data() });
+                });
+                
                 allData.sort((a, b) => {
                     const dateA = a.submittedAt ? a.submittedAt.toDate() : new Date(0);
                     const dateB = b.submittedAt ? b.submittedAt.toDate() : new Date(0);
-                    return dateB - dateA; // Terbaru di atas
+                    return dateB - dateA;
                 });
 
-                let tableHTML = `<div class="history-card"><table class="history-table"><thead><tr><th>Judul Kuis</th><th>Tanggal</th><th>Nilai</th><th>Status</th></tr></thead><tbody>`;
+                // Render Header Tabel (Warna Biru sudah diatur di CSS)
+                let tableHTML = `
+                <div class="history-card">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Judul Kuis</th>
+                                <th>Tanggal</th>
+                                <th>Nilai</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
                 allData.forEach(data => {
-                    let dateStr = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'}) : '-';
+                    let dateStr = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}) : '-';
                     let badgeClass = data.score >= 80 ? 'score-high' : (data.score >= 60 ? 'score-mid' : 'score-low');
-                    let statusText = data.score >= 60 ? 'Lulus' : 'Remedial';
-
-                    tableHTML += `<tr><td><strong>${data.quizTitle}</strong></td><td>${dateStr}</td><td><span class="score-pill ${badgeClass}">${data.score}</span></td><td>${statusText}</td></tr>`;
+                    
+                    // Tombol Unduh: Kita panggil fungsi downloadPDF dengan ID Kuis dan ID Submission
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${data.quizTitle}</strong></td>
+                            <td>${dateStr}</td>
+                            <td><span class="score-pill ${badgeClass}">${data.score}</span></td>
+                            <td>
+                                <button class="btn-sm-download" onclick="handleDownload('${data.quizId}', '${data.id}')">
+                                    <i class="fa-solid fa-file-pdf"></i> Unduh
+                                </button>
+                            </td>
+                        </tr>
+                    `;
                 });
 
                 tableHTML += `</tbody></table></div>`;
@@ -102,6 +166,129 @@
                 container.innerHTML = `<div class="state-box" style="color: #dc3545;"><i class="fa-solid fa-triangle-exclamation"></i><h3>Terjadi Kesalahan</h3><p>${error.message}</p><button onclick="window.location.reload()" class="btn btn-secondary" style="width:auto; margin-top:10px;">Coba Lagi</button></div>`;
             }
         });
+
+        // --- FUNGSI DOWNLOAD PDF ---
+        async function handleDownload(quizId, submissionId) {
+            // Panggil loading global (efek blur otomatis)
+            showLoading(); 
+
+            try {
+                // 1. Ambil Data Soal Kuis (Karena submission cuma simpan jawaban)
+                const quizDoc = await db.collection('quizzes').doc(quizId).get();
+                if(!quizDoc.exists) throw new Error("Data soal kuis ini sudah dihapus oleh admin.");
+                const quizData = quizDoc.data();
+
+                // 2. Ambil Data Jawaban Siswa
+                const subDoc = await db.collection('quiz_submissions').doc(submissionId).get();
+                if(!subDoc.exists) throw new Error("Data jawaban tidak ditemukan.");
+                const subData = subDoc.data();
+
+                // 3. Generate PDF
+                await generatePDF(quizData, subData, currentUserName);
+
+            } catch (err) {
+                // Tampilkan pesan error dengan modal cantik (efek blur otomatis)
+                showAlert("Gagal Mengunduh", err.message, "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // --- ENGINE PEMBUAT PDF (Copy dari kuis-result.js) ---
+        async function generatePDF(quizData, subData, studentName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+
+            const margin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const contentWidth = pageWidth - (margin * 2);
+            let y = margin;
+
+            function checkPageBreak(heightNeeded) {
+                if (y + heightNeeded > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+            }
+
+            // Header
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(0, 90, 156);
+            doc.text("ARSIP HASIL UJIAN", pageWidth / 2, y + 10, { align: 'center' });
+            y += 20;
+
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nama Siswa: ${studentName}`, margin, y);
+            doc.text(`Judul Kuis: ${quizData.title}`, margin, y + 7);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Nilai Akhir: ${subData.score}`, margin, y + 14);
+            
+            y += 25;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+
+            // Loop Soal
+            quizData.questions.forEach((q, index) => {
+                const userAnswerIndex = subData.answers[index];
+                const correctAnswerIndex = parseInt(q.correctAnswerIndex);
+
+                checkPageBreak(25);
+
+                // Soal
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                const questionLines = doc.splitTextToSize(`${index + 1}. ${q.questionText}`, contentWidth);
+                doc.text(questionLines, margin, y);
+                y += (questionLines.length * 5) + 3;
+
+                // Opsi
+                doc.setFontSize(10);
+                q.options.forEach((opt, i) => {
+                    const prefix = String.fromCharCode(65 + i);
+                    const optionText = `${prefix}. ${opt}`;
+                    const optionLines = doc.splitTextToSize(optionText, contentWidth - 5);
+                    const boxHeight = (optionLines.length * 5) + 4;
+
+                    checkPageBreak(boxHeight + 2);
+
+                    let r=255, g=255, b=255;
+                    if (i === correctAnswerIndex) { r=230; g=247; b=236; } // Hijau
+                    else if (i === userAnswerIndex && i !== correctAnswerIndex) { r=253; g=238; b=238; } // Merah
+
+                    doc.setFillColor(r, g, b);
+                    doc.rect(margin, y, contentWidth, boxHeight, 'F');
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(optionLines, margin + 2, y + 5);
+
+                    if (i === correctAnswerIndex) {
+                         doc.setTextColor(40, 167, 69);
+                         doc.text(" (Kunci)", margin + contentWidth - 20, y + 5);
+                    } else if (i === userAnswerIndex) {
+                         doc.setTextColor(220, 53, 69);
+                         doc.text(" (Jawabanmu)", margin + contentWidth - 25, y + 5);
+                    }
+                    doc.setTextColor(0,0,0);
+                    y += boxHeight + 2;
+                });
+                y += 5;
+            });
+
+            // Footer
+            checkPageBreak(20);
+            y += 10;
+            const dateStr = new Date().toLocaleDateString('id-ID');
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text(`Dicetak dari Cendekia Aksara pada ${dateStr}`, pageWidth/2, y, {align:'center'});
+
+            doc.save(`Arsip_${quizData.title}.pdf`);
+        }
     </script>
 </body>
 </html>
