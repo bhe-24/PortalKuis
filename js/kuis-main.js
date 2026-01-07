@@ -1,264 +1,238 @@
 // js/kuis-main.js
 
-// --- VARIABEL STATE (Penyimpan status sementara) ---
-let currentQuizData = null;      // Data kuis dari Firebase
-let currentQuestionIndex = 0;    // Kita sedang di soal nomor berapa (mulai dari 0)
-let userAnswers = [];            // Array menyimpan jawaban user: [0, 2, null, 1...]
-let flaggedQuestions = [];       // Array status ragu-ragu: [false, true, false...]
-let timerInterval = null;        // Variabel untuk Timer
-let currentUserUid = null;       // ID Siswa
-let currentUserName = null;      // Nama Siswa
-
-// 1. Ambil ID Kuis dari URL
 const urlParams = new URLSearchParams(window.location.search);
 const kuisId = urlParams.get('id');
 
-if (!kuisId) window.location.href = 'kuis-daftar.html';
+let quizData = null;
+let questions = []; // Array soal yang sudah diacak/dipilih
+let userAnswers = {}; // Simpan jawaban siswa: { 0: 1, 1: 3 } (Index soal : Index jawaban)
+let currentQIndex = 0;
+let timerInterval;
 
-// 2. Cek Login & Muat Data
+// 1. CEK AUTH & LOAD DATA
 auth.onAuthStateChanged(user => {
-    if (user) {
-        currentUserUid = user.uid;
-        // Ambil nama user dulu untuk disimpan di sertifikat/hasil nanti
-        db.collection('users').doc(user.uid).get().then(doc => {
-            currentUserName = doc.data().name;
-            startQuizSession(kuisId);
-        });
-    } else {
-        window.location.href = 'index.html';
-    }
+    if (!user) { window.location.href = 'index.html'; return; }
+    if (!kuisId) { alert("ID Kuis tidak ditemukan!"); window.location.href = 'kuis-daftar.html'; return; }
+    
+    loadExamData(kuisId);
 });
 
-// 3. Persiapan Sesi Ujian
-async function startQuizSession(id) {
+// 2. LOAD & RANDOMIZE
+async function loadExamData(id) {
     try {
         const doc = await db.collection('quizzes').doc(id).get();
-        if (!doc.exists) { alert("Soal hilang!"); window.location.href = 'kuis-daftar.html'; return; }
-
-        currentQuizData = doc.data();
+        if(!doc.exists) throw new Error("Kuis tidak ditemukan.");
         
-        // Inisialisasi Array Jawaban (Isi dengan null/kosong dulu)
-        userAnswers = new Array(currentQuizData.questions.length).fill(null);
-        flaggedQuestions = new Array(currentQuizData.questions.length).fill(false);
+        quizData = doc.data();
+        let allQuestions = quizData.questions;
 
-        // Render Tampilan Pertama
-        renderNavigationGrid();
-        renderQuestion();
-        startTimer(currentQuizData.duration);
+        // LOGIKA ACAK SOAL
+        // Jika ada limit (misal: total 100, ambil 20), kita acak dulu lalu potong
+        if (quizData.displayLimit && quizData.displayLimit > 0 && quizData.displayLimit < allQuestions.length) {
+            // Shuffle Array (Algoritma Fisher-Yates)
+            for (let i = allQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
+            }
+            questions = allQuestions.slice(0, quizData.displayLimit);
+        } else {
+            questions = allQuestions; // Pakai semua urut (atau acak semua kalau mau)
+        }
+
+        // Inisialisasi UI
+        initTimer(quizData.duration);
+        renderNavGrid();
+        loadQuestion(0);
+        
+        // Sembunyikan Loading, Tampilkan Soal
+        document.getElementById('q-loading').style.display = 'none';
+        document.getElementById('q-content').style.display = 'block';
+
+        // Peringatan Refresh
+        window.onbeforeunload = function() {
+            return "Waktu ujian sedang berjalan. Anda yakin ingin keluar?";
+        };
 
     } catch (err) {
         console.error(err);
-        alert("Gagal memuat soal.");
+        alert("Gagal memuat soal: " + err.message);
+        window.location.href = 'kuis-daftar.html';
     }
 }
 
-// 4. Fungsi Render Soal (Tampilkan Soal ke Layar)
-function renderQuestion() {
-    const q = currentQuizData.questions[currentQuestionIndex];
-    const container = document.getElementById('question-container');
-    const badge = document.getElementById('question-badge');
+// 3. RENDER SOAL
+function loadQuestion(index) {
+    currentQIndex = index;
+    const q = questions[index];
+    
+    // Update Badge Nomor
+    document.getElementById('q-no').textContent = index + 1;
+    
+    // Update Teks Soal (Support HTML Bold/Italic)
+    document.getElementById('q-text').innerHTML = q.questionText;
 
-    // Update Nomor Soal di Header
-    badge.textContent = `Soal #${currentQuestionIndex + 1}`;
+    // Update Opsi Jawaban
+    const container = document.getElementById('options-container');
+    container.innerHTML = ''; // Reset
 
-    // Buat HTML Opsi Jawaban (A, B, C, D)
-    let optionsHTML = q.options.map((opt, index) => {
-        const prefix = String.fromCharCode(65 + index); // 65 = 'A'
-        const isChecked = userAnswers[currentQuestionIndex] === index ? 'checked' : '';
+    const labels = ['A', 'B', 'C', 'D'];
+    q.options.forEach((optText, i) => {
+        const div = document.createElement('div');
         
-        return `
-        <div class="form-group">
-            <input type="radio" id="opt-${index}" name="quiz-option" value="${index}" ${isChecked}>
-            <label for="opt-${index}">
-                <span class="option-prefix">${prefix}</span>
-                <span class="option-text">${opt}</span>
-            </label>
-        </div>`;
-    }).join('');
-
-    // Masukkan ke Container
-    container.innerHTML = `
-        <div class="item-card ujian-question-container">
-            <h3 style="margin-top:0;">${q.questionText}</h3>
-            ${optionsHTML}
-        </div>
-    `;
-
-    // Pasang Event Listener: Kalau opsi diklik, simpan jawaban
-    container.querySelectorAll('input[name="quiz-option"]').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const val = parseInt(e.target.value);
-            userAnswers[currentQuestionIndex] = val; // Simpan ke array
-            
-            // Otomatis hilangkan tanda "Ragu" kalau sudah dijawab (opsional, tergantung selera)
-            // flaggedQuestions[currentQuestionIndex] = false; 
-            
-            updateGridStatus(); // Update warna kotak nomor soal
-        });
+        // Cek apakah ini jawaban yang dipilih sebelumnya?
+        const isSelected = userAnswers[index] === i ? 'selected' : '';
+        
+        div.className = `option-card ${isSelected}`;
+        div.onclick = () => selectAnswer(index, i); // Fungsi pilih jawaban
+        div.innerHTML = `
+            <div class="circle-label">${labels[i]}</div>
+            <div style="flex:1;">${optText}</div>
+        `;
+        container.appendChild(div);
     });
 
-    // Update Status Tombol (Prev/Next)
-    document.getElementById('btn-prev').disabled = (currentQuestionIndex === 0);
+    // Update Tombol Navigasi
+    document.getElementById('btn-prev').style.visibility = index === 0 ? 'hidden' : 'visible';
+    
+    // Tombol Next vs Selesai
     const btnNext = document.getElementById('btn-next');
+    const btnFinish = document.getElementById('btn-finish');
     
-    // Kalau soal terakhir, ubah tombol "Next" jadi "Selesai"
-    if (currentQuestionIndex === currentQuizData.questions.length - 1) {
-        btnNext.innerHTML = 'Selesaikan Ujian <i class="fa-solid fa-check"></i>';
-        btnNext.classList.remove('btn-primary');
-        btnNext.classList.add('btn-success');
-        btnNext.onclick = () => finishExam(false); // Mode manual submit
+    if (index === questions.length - 1) {
+        btnNext.style.display = 'none';
+        btnFinish.style.display = 'flex'; // Munculkan tombol selesai di soal terakhir
     } else {
-        btnNext.innerHTML = 'Lanjut <i class="fa-solid fa-chevron-right"></i>';
-        btnNext.classList.remove('btn-success');
-        // btnNext.classList.add('btn-primary'); // (optional jika ada class ini)
-        btnNext.onclick = () => {
-            currentQuestionIndex++;
-            renderQuestion();
-        };
+        btnNext.style.display = 'flex';
+        btnFinish.style.display = 'none';
     }
+
+    // Update Highlight di Grid Navigasi
+    updateNavHighlight();
 }
 
-// 5. Render Navigasi Grid (Kotak Angka 1, 2, 3...)
-function renderNavigationGrid() {
-    const container = document.getElementById('nav-grid-container');
-    let html = '<div class="item-card"><h4 style="margin:0 0 10px 0;">Navigasi Soal</h4><div class="nav-grid">';
+// 4. PILIH JAWABAN
+function selectAnswer(qIndex, optIndex) {
+    userAnswers[qIndex] = optIndex; // Simpan jawaban di memori
+    loadQuestion(qIndex); // Re-render untuk update tampilan "selected"
+    renderNavGrid(); // Update warna hijau di LJK
+}
+
+// 5. NAVIGASI (LJK)
+function renderNavGrid() {
+    const grid = document.getElementById('nav-grid');
+    grid.innerHTML = '';
     
-    currentQuizData.questions.forEach((_, i) => {
-        html += `<button id="nav-btn-${i}" class="nav-btn" onclick="jumpToQuestion(${i})">${i + 1}</button>`;
-    });
+    let answeredCount = 0;
 
-    html += '</div></div>';
-    container.innerHTML = html;
-    updateGridStatus();
-}
+    questions.forEach((_, i) => {
+        const btn = document.createElement('div');
+        const isAnswered = userAnswers[i] !== undefined;
+        if(isAnswered) answeredCount++;
 
-// Fungsi Update Warna Kotak Navigasi
-function updateGridStatus() {
-    currentQuizData.questions.forEach((_, i) => {
-        const btn = document.getElementById(`nav-btn-${i}`);
-        // Reset kelas
-        btn.className = 'nav-btn';
+        btn.className = `nav-item ${isAnswered ? 'answered' : ''}`;
+        if(i === currentQIndex) btn.classList.add('active'); // Sedang dibuka
         
-        if (i === currentQuestionIndex) btn.classList.add('current'); // Sedang aktif
-        if (flaggedQuestions[i]) btn.classList.add('flagged');      // Ragu
-        else if (userAnswers[i] !== null) btn.classList.add('answered'); // Sudah dijawab
+        btn.textContent = i + 1;
+        btn.onclick = () => loadQuestion(i);
+        grid.appendChild(btn);
+    });
+
+    document.getElementById('answered-count').textContent = `${answeredCount}/${questions.length} Terjawab`;
+}
+
+function updateNavHighlight() {
+    // Hanya update border active tanpa render ulang semua (biar ringan)
+    const items = document.querySelectorAll('.nav-item');
+    items.forEach((item, i) => {
+        if(i === currentQIndex) item.classList.add('active');
+        else item.classList.remove('active');
     });
 }
 
-// Fungsi Loncat Soal (Dipanggil saat klik nomor)
-window.jumpToQuestion = function(index) {
-    currentQuestionIndex = index;
-    renderQuestion();
-    updateGridStatus();
+function nextQuestion() {
+    if (currentQIndex < questions.length - 1) loadQuestion(currentQIndex + 1);
+}
+function prevQuestion() {
+    if (currentQIndex > 0) loadQuestion(currentQIndex - 1);
 }
 
-// 6. Tombol-tombol Navigasi Bawah
-document.getElementById('btn-prev').onclick = () => {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        renderQuestion();
-        updateGridStatus();
-    }
-};
-
-document.getElementById('btn-flag').onclick = () => {
-    // Toggle status ragu (True <-> False)
-    flaggedQuestions[currentQuestionIndex] = !flaggedQuestions[currentQuestionIndex];
-    
-    // Ubah teks tombol
-    const btnText = flaggedQuestions[currentQuestionIndex] ? 'Hapus Tanda Ragu' : 'Ragu-ragu';
-    document.getElementById('btn-flag').innerHTML = `<i class="fa-regular fa-flag"></i> ${btnText}`;
-    
-    updateGridStatus();
-};
-
-document.getElementById('btn-giveup').onclick = () => {
-    if(confirm("Yakin ingin menyerah? Jawaban tidak akan disimpan.")) {
-        window.location.href = 'dashboard.html';
-    }
-};
-
-// 7. TIMER (Hitung Mundur)
-function startTimer(durationMinutes) {
-    let timeLeft = durationMinutes * 60; // Ubah ke detik
+// 6. TIMER MUNDUR
+function initTimer(durationMinutes) {
+    let time = durationMinutes * 60; // Ubah ke detik
     const display = document.getElementById('timer-display');
 
     timerInterval = setInterval(() => {
-        const h = Math.floor(timeLeft / 3600).toString().padStart(2, '0');
-        const m = Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0');
-        const s = (timeLeft % 60).toString().padStart(2, '0');
-        
-        display.textContent = `${h}:${m}:${s}`;
-        timeLeft--;
+        const hours = Math.floor(time / 3600);
+        const minutes = Math.floor((time % 3600) / 60);
+        const seconds = time % 60;
 
-        // Peringatan 1 menit terakhir (merah)
-        if (timeLeft < 60) display.style.backgroundColor = '#dc3545';
+        // Format 00:00:00
+        display.textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        // Waktu Habis
-        if (timeLeft < 0) {
+        if (time <= 0) {
             clearInterval(timerInterval);
-            alert("WAKTU HABIS! Jawaban Anda akan dikirim otomatis.");
-            finishExam(true); // true = force submit
+            alert("Waktu Habis! Jawaban akan dikirim otomatis.");
+            finishExam(true); // Force submit
         }
+        time--;
     }, 1000);
 }
 
-// 8. LOGIKA SELESAI (Submit)
+// 7. KUMPULKAN JAWABAN (FINISH)
 async function finishExam(force = false) {
-    // Jika bukan paksaan (waktu habis), tanya dulu
+    // Konfirmasi dulu (kecuali waktu habis / force)
     if (!force) {
-        // Cek apakah masih ada soal yang belum dijawab atau ragu
-        const unanswered = userAnswers.filter(a => a === null).length;
-        const flagged = flaggedQuestions.filter(f => f === true).length;
-        
-        let msg = "Yakin ingin menyelesaikan ujian?";
-        if (unanswered > 0 || flagged > 0) {
-            msg += `\n\nMasih ada ${unanswered} soal kosong dan ${flagged} soal ragu-ragu.`;
-        }
-        
-        if (!confirm(msg)) return;
+        const answered = Object.keys(userAnswers).length;
+        const total = questions.length;
+        const yakin = await showConfirm(
+            "Kumpulkan Jawaban?", 
+            `Anda baru menjawab ${answered} dari ${total} soal. Yakin ingin mengakhiri?`
+        );
+        if (!yakin) return;
     }
 
+    // Matikan pencegah refresh
+    window.onbeforeunload = null;
     clearInterval(timerInterval);
-    showLoading(); // Tampilkan loading overlay
+    
+    showLoading(); // Tampilkan Blur
 
-    // --- HITUNG NILAI ---
-    let score = 0;
-    currentQuizData.questions.forEach((q, index) => {
-        const userAnswer = userAnswers[index];
-        const correctAnswer = parseInt(q.correctAnswerIndex);
-        if (userAnswer === correctAnswer) {
-            score++;
+    // HITUNG NILAI (Client Side Calculation)
+    let correctCount = 0;
+    questions.forEach((q, i) => {
+        const myAns = userAnswers[i];
+        if (myAns !== undefined && myAns === q.correctAnswerIndex) {
+            correctCount++;
         }
     });
 
-    // Skala 0-100
-    const finalScore = Math.round((score / currentQuizData.questions.length) * 100);
+    const finalScore = Math.round((correctCount / questions.length) * 100);
 
-    // --- SIMPAN KE FIREBASE ---
-    const payload = {
-        studentUid: currentUserUid,
-        studentName: currentUserName,
+    // Siapkan Data untuk Disimpan
+    const submissionData = {
         quizId: kuisId,
-        quizTitle: currentQuizData.title,
+        quizTitle: quizData.title,
+        studentUid: auth.currentUser.uid,
+        studentName: auth.currentUser.displayName || "Siswa", // Opsional
         score: finalScore,
-        answers: userAnswers, // Simpan jawaban siswa untuk keperluan review nanti
-        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        answers: userAnswers, // Simpan jawaban mentah (Index)
+        submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        totalQuestions: questions.length,
+        correctCount: correctCount
     };
 
     try {
-        await db.collection('quiz_submissions').add(payload);
-        // Redirect ke Halaman Hasil (Result)
-        // Kita bawa Score & ID lewat URL biar halaman sana tidak perlu loading ulang
-        window.location.href = `kuis-result.html?id=${kuisId}&score=${finalScore}`;
-    } catch (err) {
-        console.error(err);
+        // Simpan ke Firebase
+        await db.collection('quiz_submissions').add(submissionData);
+        
         hideLoading();
-        alert("Terjadi kesalahan saat menyimpan jawaban. Silakan coba lagi atau hubungi admin.");
+        // Redirect ke Hasil
+        window.location.href = `kuis-result.html?score=${finalScore}&total=${questions.length}&correct=${correctCount}&qid=${kuisId}`;
+        
+    } catch (err) {
+        hideLoading();
+        console.error(err);
+        alert("Gagal menyimpan nilai. Cek koneksi internet!");
     }
 }
-
-// Mencegah Refresh Halaman Tidak Sengaja
-window.onbeforeunload = function() {
-    return "Data ujian akan hilang jika Anda me-refresh halaman!";
-};
