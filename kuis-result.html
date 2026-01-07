@@ -18,147 +18,238 @@
     <link rel="stylesheet" href="css/style.css">
 
     <style>
+        /* --- PERBAIKAN SCROLL & LAYOUT --- */
         body { 
             background-color: #f0f2f5; 
             min-height: 100vh; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            padding: 20px; 
+            padding: 40px 20px; /* Memberi ruang atas bawah */
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
+            overflow-y: auto; /* MEMPERBOLEHKAN SCROLL */
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .result-container {
-            width: 100%; max-width: 500px;
-            text-align: center;
+        /* --- ANIMASI LATAR BELAKANG (SOFT AURA) --- */
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: #f0f4f8; /* Warna Dasar */
+            overflow: hidden;
+        }
+
+        /* Bola Cahaya Lembut */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Efek Blur Kuat (Glow) */
+            opacity: 0.6;
+            animation: float 20s infinite alternate;
+        }
+
+        .blob-1 {
+            top: -10%; left: -10%; width: 500px; height: 500px;
+            background: #a1c4fd; /* Biru Langit */
+            animation-delay: 0s;
+        }
+        .blob-2 {
+            bottom: -10%; right: -10%; width: 400px; height: 400px;
+            background: #c2e9fb; /* Biru Muda */
+            animation-delay: -5s;
+        }
+        .blob-3 {
+            bottom: 20%; left: 20%; width: 300px; height: 300px;
+            background: #fed6e3; /* Pink Tipis (Aksen) */
+            opacity: 0.4;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
         }
 
         /* --- KARTU HASIL --- */
+        .result-container {
+            width: 100%; 
+            max-width: 480px; /* Sedikit lebih ramping agar elegan */
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            margin: auto; /* Center vertical jika konten sedikit */
+        }
+
         .result-card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Sedikit transparan */
+            backdrop-filter: blur(20px); /* Efek Kaca (Glassmorphism) */
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08); /* Bayangan Halus Lebar */
             position: relative;
             text-align: center;
             padding-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
-        /* Hiasan Header */
+        /* Header Gradient */
         .card-header-bg {
-            height: 120px;
-            background: linear-gradient(135deg, #005a9c, #4facfe); /* Biru Cendekia */
+            height: 130px;
+            background: linear-gradient(135deg, #0061f2, #6900f2); /* Gradient Premium */
             position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 25px;
         }
-        .card-header-bg::after {
-            content: ''; position: absolute; bottom: -20px; left: 0; right: 0;
-            height: 40px; background: white; border-radius: 50% 50% 0 0;
+        
+        /* Lengkungan Putih Pemisah */
+        .header-curve {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 50px; background: white;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; /* Lengkungan Mulus */
+            transform: scaleX(1.5); /* Melebarkan lengkungan */
+        }
+
+        /* Brand Text */
+        .brand-text {
+            color: white; font-weight: 600; font-size: 1.1em; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px; z-index: 2;
         }
 
         /* Skor Besar */
+        .score-wrapper {
+            position: relative; margin-top: -60px; z-index: 5;
+        }
         .score-circle {
-            width: 140px; height: 140px;
+            width: 120px; height: 120px;
             background: white; border-radius: 50%;
-            margin: -70px auto 15px auto;
-            position: relative; z-index: 2;
+            margin: 0 auto;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            border: 5px solid #f8f9fa;
+            box-shadow: 0 10px 25px rgba(0,97,242,0.2); /* Bayangan Biru */
         }
-        .score-val { font-size: 3.5em; font-weight: 700; color: #005a9c; line-height: 1; }
-        .score-label { font-size: 0.8em; color: #777; text-transform: uppercase; letter-spacing: 1px; }
+        .score-val { font-size: 3.5em; font-weight: 700; color: #0061f2; line-height: 1; }
+        .score-label { font-size: 0.7em; color: #999; font-weight: 600; margin-top: 2px; }
 
-        /* Detail Teks */
-        .result-title { font-size: 1.2em; font-weight: 700; color: #333; margin: 0; padding: 0 20px; }
-        .result-subtitle { color: #666; font-size: 0.9em; margin-top: 5px; margin-bottom: 20px; padding: 0 20px; }
-
-        /* Grid Statistik Kecil */
-        .mini-stats {
-            display: flex; justify-content: center; gap: 30px;
-            margin: 20px 0; padding: 0 20px;
-        }
-        .ms-item { text-align: center; }
-        .ms-val { font-weight: 700; color: #333; font-size: 1.1em; }
-        .ms-label { font-size: 0.75em; color: #888; }
-
-        /* Status Badge */
+        /* Badge Status */
         .status-badge {
-            display: inline-block; padding: 8px 25px; border-radius: 50px;
-            font-weight: 600; font-size: 0.9em; margin-bottom: 10px;
+            display: inline-block; padding: 6px 20px; border-radius: 50px;
+            font-weight: 600; font-size: 0.85em; margin: 15px 0 5px 0;
+            letter-spacing: 0.5px;
         }
-        .status-lulus { background: #e6f7ec; color: #28a745; }
-        .status-remed { background: #fdeeee; color: #dc3545; }
+        .status-lulus { background: #d1e7dd; color: #0f5132; }
+        .status-remed { background: #f8d7da; color: #842029; }
 
-        /* Area Tombol */
-        .action-area { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; }
+        /* Teks Info */
+        .result-title { font-size: 1.3em; font-weight: 700; color: #2c3e50; margin: 10px 0 5px 0; padding: 0 20px; }
+        .result-subtitle { color: #6c757d; font-size: 0.95em; margin: 0 0 25px 0; padding: 0 20px; }
+
+        /* Statistik Grid */
+        .mini-stats {
+            display: flex; justify-content: center; gap: 15px;
+            margin: 0 30px 25px 30px; padding: 15px;
+            background: #f8f9fa; border-radius: 15px;
+        }
+        .ms-item { flex: 1; text-align: center; }
+        .ms-val { font-weight: 700; color: #2c3e50; font-size: 1.1em; }
+        .ms-label { font-size: 0.75em; color: #adb5bd; text-transform: uppercase; font-weight: 600; }
+        .ms-divider { width: 1px; background: #e9ecef; }
+
+        /* Tombol Modern */
+        .action-area { margin-top: 25px; display: flex; flex-direction: column; gap: 12px; }
         
-        .btn-img { background: #333; color: white; border: none; }
-        .btn-pdf { background: white; color: #d32f2f; border: 1px solid #d32f2f; }
-        .btn-home { background: transparent; color: #555; text-decoration: underline; margin-top: 10px; cursor: pointer; border: none; }
-
-        .btn-full {
-            padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s;
+        .btn-action {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-weight: 600; font-size: 1em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn-full:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-action:active { transform: scale(0.98); }
+
+        .btn-gold { 
+            background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%); 
+            color: #5c4002; 
+            box-shadow: 0 4px 15px rgba(253, 185, 49, 0.3);
+        }
+        .btn-blue { 
+            background: white; border: 2px solid #e0e6ed; color: #0061f2; 
+        }
+        .btn-blue:hover { border-color: #0061f2; background: #f8fbff; }
+
+        .btn-link { 
+            background: transparent; color: #6c757d; font-size: 0.9em; 
+            margin-top: 10px; cursor: pointer; border: none; 
+            text-decoration: none; 
+        }
+        .btn-link:hover { color: #0061f2; }
 
     </style>
 </head>
 <body>
+
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
 
     <div class="result-container">
         
         <div id="result-card" class="result-card">
             
             <div class="card-header-bg">
-                <div style="padding-top: 20px; color: white; font-weight: 600; font-size: 1.1em;">
+                <div class="brand-text">
                     <i class="fa-solid fa-graduation-cap"></i> Cendekia Aksara
+                </div>
+                <div class="header-curve"></div> </div>
+
+            <div class="score-wrapper">
+                <div class="score-circle">
+                    <span id="display-score" class="score-val">0</span>
+                    <span class="score-label">NILAI</span>
                 </div>
             </div>
 
-            <div class="score-circle">
-                <span id="display-score" class="score-val">0</span>
-                <span class="score-label">Nilai Akhir</span>
-            </div>
-
-            <div id="status-badge" class="status-badge status-lulus">MEMUAT HASIL...</div>
+            <div id="status-badge" class="status-badge status-lulus">Memuat...</div>
 
             <h2 id="quiz-title" class="result-title">...</h2>
             <p id="student-name" class="result-subtitle">...</p>
 
             <div class="mini-stats">
                 <div class="ms-item">
-                    <div id="val-correct" class="ms-val">0</div>
+                    <div id="val-correct" class="ms-val" style="color: #198754;">0</div>
                     <div class="ms-label">Benar</div>
                 </div>
+                <div class="ms-divider"></div>
                 <div class="ms-item">
-                    <div id="val-wrong" class="ms-val">0</div>
+                    <div id="val-wrong" class="ms-val" style="color: #dc3545;">0</div>
                     <div class="ms-label">Salah</div>
                 </div>
+                <div class="ms-divider"></div>
                 <div class="ms-item">
                     <div id="val-date" class="ms-val">-</div>
                     <div class="ms-label">Tanggal</div>
                 </div>
             </div>
 
-            <div style="font-size: 0.7em; color: #bbb; margin-top: 10px;">
-                Terverifikasi Otomatis oleh Sistem
+            <div style="font-size: 0.75em; color: #adb5bd; margin-bottom: 5px;">
+                ID Verifikasi Sistem: <span id="res-id">...</span>
             </div>
         </div>
 
         <div class="action-area">
-            <button onclick="downloadImage()" class="btn-full btn-img">
-                <i class="fa-solid fa-image"></i> Simpan Kartu Hasil (JPG)
+            <button onclick="downloadImage()" class="btn-action btn-gold">
+                <i class="fa-solid fa-certificate"></i> Simpan Kartu Hasil
             </button>
             
-            <button onclick="downloadPDF()" class="btn-full btn-pdf">
-                <i class="fa-solid fa-file-pdf"></i> Unduh Arsip Soal (PDF)
+            <button onclick="downloadPDF()" class="btn-action btn-blue">
+                <i class="fa-solid fa-file-arrow-down"></i> Unduh Arsip Soal
             </button>
             
-            <button onclick="window.location.href='dashboard.html'" class="btn-home">
+            <button onclick="window.location.href='dashboard.html'" class="btn-link">
                 Kembali ke Dashboard
             </button>
         </div>
@@ -167,61 +258,49 @@
 
     <script src="js/config.js"></script>
     <script>
+        // === SCRIPT SAMA SEPERTI SEBELUMNYA (TETAP JALAN) ===
+        
         // Ambil Parameter dari URL
         const urlParams = new URLSearchParams(window.location.search);
-        const paramQid = urlParams.get('qid'); // ID Kuis
+        const paramQid = urlParams.get('qid'); 
 
-        // Data Global untuk PDF
         let globalQuizData = null;
         let globalSubmissionData = null;
 
         auth.onAuthStateChanged(async user => {
             if (!user) { window.location.href = 'index.html'; return; }
-            
-            if(!paramQid) {
-                alert("Data hasil tidak ditemukan.");
-                window.location.href = 'dashboard.html';
-                return;
-            }
+            if(!paramQid) { window.location.href = 'dashboard.html'; return; }
 
-            // Panggil Loading
             if(typeof showLoading === 'function') showLoading();
 
             try {
-                // === PERBAIKAN: HAPUS .orderBy() AGAR TIDAK BUTUH INDEX FIREBASE ===
+                // Ambil Nama Asli
+                let studentName = user.displayName;
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if(userDoc.exists && userDoc.data().name) studentName = userDoc.data().name;
+
+                // Ambil Data Nilai (No Index)
                 const subQuery = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .where('quizId', '==', paramQid)
                     .get();
 
-                if (subQuery.empty) {
-                    throw new Error("Data ujian tidak ditemukan di database.");
-                }
+                if (subQuery.empty) throw new Error("Data ujian tidak ditemukan.");
 
-                // Kita Urutkan Manual di Sini (Ambil yang paling baru)
                 let submissions = [];
                 subQuery.forEach(doc => submissions.push(doc.data()));
+                submissions.sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
                 
-                // Sort Descending (Terbaru di atas) berdasarkan submittedAt
-                submissions.sort((a, b) => {
-                    const dateA = a.submittedAt ? a.submittedAt.seconds : 0;
-                    const dateB = b.submittedAt ? b.submittedAt.seconds : 0;
-                    return dateB - dateA;
-                });
-
-                // Ambil yang pertama (terbaru)
                 globalSubmissionData = submissions[0];
 
-                // 2. AMBIL DATA SOAL KUIS (Untuk PDF)
+                // Ambil Soal
                 const quizDoc = await db.collection('quizzes').doc(paramQid).get();
-                if (!quizDoc.exists) throw new Error("Data soal kuis hilang.");
-                globalQuizData = quizDoc.data();
+                globalQuizData = quizDoc.exists ? quizDoc.data() : {title:'Kuis'};
 
-                // 3. RENDER KARTU HASIL
-                renderResultCard(globalSubmissionData, user.displayName);
+                renderResultCard(globalSubmissionData, studentName);
 
             } catch (err) {
-                console.error("Error Detail:", err);
+                console.error(err);
                 alert("Gagal memuat: " + err.message);
             } finally {
                 if(typeof hideLoading === 'function') hideLoading();
@@ -229,21 +308,18 @@
         });
 
         function renderResultCard(data, userName) {
-            // Isi Data Kartu
             document.getElementById('display-score').textContent = data.score;
             document.getElementById('quiz-title').textContent = data.quizTitle;
-            document.getElementById('student-name').textContent = userName || "Siswa Cendekia";
+            document.getElementById('student-name').textContent = userName || "Siswa";
+            document.getElementById('res-id').textContent = paramQid.substring(0,8);
             
-            // Hitung Salah
             const wrong = data.totalQuestions - data.correctCount;
             document.getElementById('val-correct').textContent = data.correctCount;
             document.getElementById('val-wrong').textContent = wrong;
 
-            // Tanggal
             const date = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('id-ID') : '-';
             document.getElementById('val-date').textContent = date;
 
-            // Status Lulus/Tidak
             const badge = document.getElementById('status-badge');
             if (data.score >= 70) {
                 badge.textContent = "LULUS / KOMPETEN";
@@ -254,12 +330,11 @@
             }
         }
 
-        // --- FITUR DOWNLOAD GAMBAR ---
         function downloadImage() {
             const card = document.getElementById('result-card');
             if(typeof showLoading === 'function') showLoading();
 
-            html2canvas(card, { scale: 2 }).then(canvas => {
+            html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Hasil_${globalSubmissionData.quizTitle}.png`;
                 link.href = canvas.toDataURL("image/png");
@@ -271,96 +346,50 @@
             });
         }
 
-        // --- FITUR DOWNLOAD PDF ---
         async function downloadPDF() {
-            if (!globalQuizData || !globalSubmissionData) {
-                alert("Data belum siap. Tunggu sebentar...");
-                return;
-            }
-
+            if (!globalQuizData || !globalSubmissionData) return alert("Data belum siap.");
             if(typeof showLoading === 'function') showLoading();
 
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
-                const margin = 15;
-                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 15; const pw = doc.internal.pageSize.getWidth();
                 let y = 20;
 
-                // HEADER
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(16);
-                doc.setTextColor(0, 90, 156);
-                doc.text("ARSIP HASIL UJIAN", pageWidth / 2, y, { align: 'center' });
-                y += 10;
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(0, 90, 156);
+                doc.text("ARSIP HASIL UJIAN", pw / 2, y, { align: 'center' }); y += 15;
 
-                doc.setFontSize(11);
-                doc.setTextColor(0, 0, 0);
-                doc.setFont('helvetica', 'normal');
-                doc.text(`Nama: ${globalSubmissionData.studentName || 'Siswa'}`, margin, y);
-                y += 6;
-                doc.text(`Kuis: ${globalQuizData.title}`, margin, y);
-                y += 6;
-                doc.text(`Nilai: ${globalSubmissionData.score} (${globalSubmissionData.score >= 70 ? 'Lulus' : 'Remedial'})`, margin, y);
-                
-                y += 10;
-                doc.setDrawColor(200);
-                doc.line(margin, y, pageWidth - margin, y);
-                y += 10;
+                doc.setFontSize(10); doc.setTextColor(0); doc.setFont('helvetica', 'normal');
+                doc.text(`Nama: ${globalSubmissionData.studentName || 'Siswa'}`, margin, y); y += 6;
+                doc.text(`Kuis: ${globalQuizData.title}`, margin, y); y += 6;
+                doc.text(`Nilai: ${globalSubmissionData.score}`, margin, y); y += 10;
+                doc.line(margin, y, pw - margin, y); y += 10;
 
-                // CONTENT SOAL
                 const questions = globalQuizData.questions;
                 const userAns = globalSubmissionData.answers || {};
 
                 questions.forEach((q, index) => {
-                    const studentChoice = userAns[index];
-                    const correctChoice = parseInt(q.correctAnswerIndex);
-
                     if (y > 270) { doc.addPage(); y = 20; }
-
                     doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(11);
                     const qText = `${index + 1}. ${q.questionText.replace(/<[^>]*>?/gm, '')}`;
-                    const splitTitle = doc.splitTextToSize(qText, pageWidth - (margin * 2));
-                    doc.text(splitTitle, margin, y);
-                    y += (splitTitle.length * 5) + 3;
+                    const splitTitle = doc.splitTextToSize(qText, pw - (margin * 2));
+                    doc.text(splitTitle, margin, y); y += (splitTitle.length * 5) + 3;
 
                     doc.setFont('helvetica', 'normal');
-                    doc.setFontSize(10);
-                    
                     q.options.forEach((opt, i) => {
-                        let prefix = (i === studentChoice) ? "(x) " : "( ) ";
-                        let color = [0, 0, 0];
-
-                        if (i === correctChoice) {
-                            color = [0, 150, 0]; 
-                            prefix = "(KUNCI) ";
-                        } 
-                        if (i === studentChoice && i !== correctChoice) {
-                            color = [200, 0, 0];
-                            prefix = "(JAWABANMU) ";
-                        }
-
-                        doc.setTextColor(color[0], color[1], color[2]);
-                        const optText = `${String.fromCharCode(65+i)}. ${opt}`;
-                        const splitOpt = doc.splitTextToSize(prefix + optText, pageWidth - (margin * 2) - 10);
+                        let prefix = "( ) "; let color = [0,0,0];
+                        if (userAns[index] === i) { prefix = "(x) "; if (parseInt(q.correctAnswerIndex) !== i) color = [200,0,0]; }
+                        if (parseInt(q.correctAnswerIndex) === i) { prefix = "(KUNCI) "; color = [0,150,0]; }
                         
-                        doc.text(splitOpt, margin + 5, y);
-                        y += (splitOpt.length * 5) + 1;
+                        doc.setTextColor(color[0], color[1], color[2]);
+                        const optText = doc.splitTextToSize(prefix + opt, pw - (margin * 2) - 10);
+                        doc.text(optText, margin + 5, y); y += (optText.length * 5) + 1;
                     });
-                    
-                    doc.setTextColor(0,0,0);
-                    y += 5;
+                    doc.setTextColor(0); y += 5;
                 });
-
                 doc.save(`Arsip_${globalQuizData.title}.pdf`);
-
-            } catch (err) {
-                console.error(err);
-                alert("Gagal membuat PDF: " + err.message);
-            } finally {
-                if(typeof hideLoading === 'function') hideLoading();
-            }
+            } catch (err) { alert("Gagal PDF"); } 
+            finally { if(typeof hideLoading === 'function') hideLoading(); }
         }
     </script>
 </body>
