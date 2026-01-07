@@ -3,74 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konfirmasi Kuis - Cendekia Aksara</title>
+    <title>Persiapan Ujian - Cendekia Aksara</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #005a9c;
+            --secondary: #004070;
+            --accent: #f7a04a;
+            --bg-body: #f4f7f6;
+            --text-main: #333;
+            --success: #28a745;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            margin: 0; padding: 0;
+            color: var(--text-main);
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: white; padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .container { width: 90%; max-width: 1000px; margin: 0 auto; }
+        .nav-content { display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; }
+        .nav-logo { width: 40px; height: auto; }
+        .brand-text { font-weight: 700; color: var(--primary); font-size: 1.2em; }
+        
+        .btn-back {
+            text-decoration: none; color: #555; font-weight: 500;
+            display: flex; align-items: center; gap: 5px; transition: 0.3s;
+        }
+        .btn-back:hover { color: var(--primary); }
+
+        /* KARTU PRE-KUIS */
+        .lobby-container {
+            max-width: 700px; margin: 40px auto;
+            background: white; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+
+        /* Header Kartu (Gradient) */
+        .lobby-header {
+            background: linear-gradient(135deg, var(--primary), #00d2ff);
+            color: white; padding: 40px 30px; text-align: center;
+        }
+        .quiz-title { margin: 0; font-size: 1.8em; font-weight: 700; }
+        .quiz-subject { 
+            background: rgba(255,255,255,0.2); 
+            padding: 5px 15px; border-radius: 50px; 
+            font-size: 0.9em; margin-top: 10px; display: inline-block;
+        }
+
+        /* Body Kartu */
+        .lobby-body { padding: 30px; }
+
+        /* Statistik Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; margin-bottom: 30px;
+        }
+        .stat-box {
+            text-align: center; padding: 15px;
+            background: #f8f9fa; border-radius: 12px;
+            border: 1px solid #eee;
+        }
+        .stat-icon { font-size: 1.5em; color: var(--primary); margin-bottom: 5px; }
+        .stat-val { font-weight: 700; font-size: 1.1em; display: block; }
+        .stat-label { font-size: 0.8em; color: #777; }
+
+        /* Aturan */
+        .rules-box {
+            background: #fff8e1; border-left: 5px solid #ffc107;
+            padding: 20px; border-radius: 8px; margin-bottom: 30px;
+        }
+        .rules-title { font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .rules-list { margin: 0; padding-left: 20px; color: #555; line-height: 1.6; font-size: 0.95em; }
+
+        /* Tombol Mulai */
+        .btn-start-exam {
+            display: block; width: 100%;
+            background: var(--success); color: white;
+            padding: 15px; border: none; border-radius: 12px;
+            font-size: 1.1em; font-weight: 700; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+            text-align: center; text-decoration: none;
+        }
+        .btn-start-exam:hover { background: #218838; transform: translateY(-2px); }
+        .btn-start-exam.disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Loading & Error */
+        .loading-view, .error-view { text-align: center; padding: 50px; }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-box { display: flex; align-items: center; gap: 15px; text-align: left; padding: 10px 20px; }
+            .stat-icon { margin: 0; }
+        }
+    </style>
 </head>
 <body>
 
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-text">Cendekia Aksara</span>
+            </div>
+            <a href="kuis-daftar.html" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i> Batal
+            </a>
+        </div>
+    </nav>
+
     <div class="container">
-        <a href="kuis-daftar.html" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 20px; display: inline-block; text-decoration: none;">
-            <i class="fa-solid fa-arrow-left"></i> Batal / Kembali
-        </a>
-
-        <div class="header">
-            <h2>Konfirmasi Data</h2>
-            <p>Harap periksa detail sebelum memulai.</p>
+        
+        <div id="loading-view" class="loading-view">
+            <div class="spinner"></div>
+            <p>Menyiapkan ruang ujian...</p>
         </div>
 
-        <div class="item-card">
-            <h3 id="detail-title" style="text-align: left; margin-bottom: 10px; color: var(--primary-color);">Memuat judul...</h3>
-            <table style="width: 100%; font-size: 0.9em; color: var(--dark-text);">
-                <tr>
-                    <td style="padding: 5px 0; width: 120px; font-weight: bold;">Mata Pelajaran</td>
-                    <td id="detail-subject">: ...</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0; font-weight: bold;">Jumlah Soal</td>
-                    <td id="detail-count">: ...</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0; font-weight: bold;">Durasi Waktu</td>
-                    <td id="detail-duration">: ...</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0; font-weight: bold;">Pengajar</td>
-                    <td id="detail-teacher">: ...</td>
-                </tr>
-            </table>
+        <div id="error-view" class="error-view" style="display: none;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 3em; color: #dc3545; margin-bottom: 20px;"></i>
+            <h3>Kuis Tidak Ditemukan</h3>
+            <p style="color: #666;">Data soal tidak valid atau telah dihapus.</p>
+            <a href="kuis-daftar.html" class="btn-back" style="justify-content: center; margin-top: 20px; color: var(--primary);">
+                Kembali ke Daftar Kuis
+            </a>
         </div>
 
-        <div class="item-card" style="background-color: #fff8e1; border-color: #ffe082;">
-            <h4 style="margin-top: 0; color: #f57f17;"><i class="fa-solid fa-triangle-exclamation"></i> Petunjuk Pengerjaan</h4>
-            <ul style="text-align: left; padding-left: 20px; line-height: 1.6; font-size: 0.9em;">
-                <li>Waktu akan otomatis berjalan mundur saat Anda menekan tombol <b>MULAI</b>.</li>
-                <li>Pastikan koneksi internet Anda stabil.</li>
-                <li>Dilarang me-refresh halaman browser selama ujian berlangsung.</li>
-                <li>Jika waktu habis, jawaban akan tersimpan otomatis apa adanya.</li>
-            </ul>
+        <div id="lobby-card" class="lobby-container" style="display: none;">
+            
+            <div class="lobby-header">
+                <h1 id="quiz-title" class="quiz-title">Memuat Judul...</h1>
+                <span id="quiz-subject" class="quiz-subject">Memuat Mapel...</span>
+            </div>
+
+            <div class="lobby-body">
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <i class="fa-regular fa-clock stat-icon"></i>
+                        <div>
+                            <span id="quiz-duration" class="stat-val">0 Menit</span>
+                            <span class="stat-label">Durasi</span>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa-solid fa-list-ol stat-icon"></i>
+                        <div>
+                            <span id="quiz-q-count" class="stat-val">0 Soal</span>
+                            <span class="stat-label">Jumlah Soal</span>
+                        </div>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fa-solid fa-bullseye stat-icon"></i>
+                        <div>
+                            <span class="stat-val">70</span>
+                            <span class="stat-label">KKM / Target</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rules-box">
+                    <div class="rules-title"><i class="fa-solid fa-circle-info"></i> Petunjuk Pengerjaan</div>
+                    <ul class="rules-list">
+                        <li>Berdoalah sebelum mengerjakan soal.</li>
+                        <li>Waktu akan berjalan otomatis saat tombol "Mulai" ditekan.</li>
+                        <li>Dilarang membuka tab lain atau bekerjasama.</li>
+                        <li>Jawaban akan tersimpan otomatis.</li>
+                        <li>Jika waktu habis, jawaban akan dikirim secara otomatis.</li>
+                    </ul>
+                </div>
+
+                <button id="btn-start" class="btn-start-exam" onclick="startQuiz()">
+                    MULAI MENGERJAKAN <i class="fa-solid fa-rocket" style="margin-left: 8px;"></i>
+                </button>
+            </div>
         </div>
 
-        <div style="margin-top: 30px; text-align: right;">
-            <button id="btn-start" class="btn btn-success" style="width: auto; padding: 12px 30px; font-size: 1.1em;">
-                MULAI MENGERJAKAN <i class="fa-solid fa-rocket"></i>
-            </button>
-        </div>
-
-    </div>
-
-    <div id="loading-overlay" class="hidden">
-        <div class="progress-spinner"></div>
-        <p>Menyiapkan Soal...</p>
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/kuis-pre.js"></script>
+    <script>
+        // Ambil ID dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const kuisId = urlParams.get('id');
 
+        // Elemen HTML
+        const loadingView = document.getElementById('loading-view');
+        const errorView = document.getElementById('error-view');
+        const lobbyCard = document.getElementById('lobby-card');
+        const btnStart = document.getElementById('btn-start');
+
+        // Data Kuis Sementara
+        let quizData = null;
+
+        // 1. Cek Login
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                if(!kuisId) {
+                    showError();
+                } else {
+                    loadQuizData(kuisId);
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // 2. Ambil Data Kuis dari Firebase
+        async function loadQuizData(id) {
+            try {
+                const doc = await db.collection('quizzes').doc(id).get();
+                
+                if (!doc.exists) {
+                    showError();
+                    return;
+                }
+
+                quizData = doc.data();
+                renderUI(quizData);
+
+            } catch (err) {
+                console.error(err);
+                showError();
+            }
+        }
+
+        // 3. Tampilkan Data ke Layar
+        function renderUI(data) {
+            loadingView.style.display = 'none';
+            lobbyCard.style.display = 'block';
+
+            document.getElementById('quiz-title').textContent = data.title;
+            document.getElementById('quiz-subject').textContent = data.subject;
+            document.getElementById('quiz-duration').textContent = data.duration + " Menit";
+            
+            // Logika Jumlah Soal (Cek apakah ada limit acak)
+            let totalQ = data.questions.length;
+            if (data.displayLimit && data.displayLimit > 0 && data.displayLimit < totalQ) {
+                totalQ = data.displayLimit; // Tampilkan jumlah yang akan dikerjakan saja
+            }
+            document.getElementById('quiz-q-count').textContent = totalQ + " Soal";
+        }
+
+        // 4. Fungsi Mulai
+        function startQuiz() {
+            if(!kuisId) return;
+            
+            // Ubah tombol jadi loading
+            btnStart.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memproses...';
+            btnStart.classList.add('disabled');
+            
+            // Redirect ke Halaman Ujian Utama
+            setTimeout(() => {
+                window.location.href = `kuis-main.html?id=${kuisId}`;
+            }, 1000); // Delay dikit biar smooth
+        }
+
+        // Helper: Tampilkan Error
+        function showError() {
+            loadingView.style.display = 'none';
+            lobbyCard.style.display = 'none';
+            errorView.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
