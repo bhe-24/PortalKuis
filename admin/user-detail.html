@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsip Nilai - Admin Cendekia</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        /* Layout Detail: Kiri Profil, Kanan Tabel */
+        .detail-container { display: flex; gap: 30px; align-items: flex-start; }
+        .profile-sidebar { flex: 1; background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .grades-content { flex: 2; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .score-pill { padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
+        .score-high { background: #e6f7ec; color: #28a745; }
+        .score-low { background: #fdeeee; color: #dc3545; }
+
+        @media (max-width: 768px) {
+            .detail-container { flex-direction: column; }
+            .profile-sidebar, .grades-content { width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-gray">
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-name">Cendekia Aksara</span>
+            </div>
+            <a href="users-list.html" class="btn-logout" style="color:#333; border-color:#ddd;">
+                <i class="fa-solid fa-arrow-left"></i> Daftar Siswa
+            </a>
+        </div>
+    </nav>
+
+    <div class="container dashboard-content">
+        <div class="detail-container">
+            
+            <div class="profile-sidebar">
+                <div class="card-avatar" style="width:120px; height:120px;">
+                    <img id="d-avatar" src="" alt="Avatar">
+                </div>
+                <h2 id="d-name" style="margin:0 0 5px 0;">Memuat...</h2>
+                <p id="d-email" style="color:gray; font-size:0.9em; margin-bottom:15px;">...</p>
+                
+                <hr style="border:0; border-top:1px dashed #ddd; margin: 15px 0;">
+                
+                <div style="text-align:left; font-size:0.95em; color:#555;">
+                    <p><i class="fa-solid fa-venus-mars" style="width:25px;"></i> <span id="d-gender">-</span></p>
+                    <p><i class="fa-solid fa-cake-candles" style="width:25px;"></i> <span id="d-age">-</span> Tahun</p>
+                    <p><i class="fa-solid fa-graduation-cap" style="width:25px;"></i> <span id="d-semester">-</span></p>
+                    <p><i class="fa-solid fa-location-dot" style="width:25px;"></i> <span id="d-address">-</span></p>
+                </div>
+            </div>
+
+            <div class="grades-content">
+                <h3 style="margin-top:0; border-bottom:2px solid #f0f0f0; padding-bottom:15px;">
+                    <i class="fa-solid fa-folder-open"></i> Arsip Nilai Kuis
+                </h3>
+                
+                <div id="grades-list">
+                    <p style="text-align:center; color:gray; padding:30px;">Memuat riwayat...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-users.js"></script>
+</body>
+</html>
