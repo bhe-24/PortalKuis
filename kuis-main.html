@@ -9,55 +9,204 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-</head>
-<body>
 
-    <div class="container">
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* CSS KHUSUS HALAMAN UJIAN */
+        body { background-color: #f0f2f5; overflow-x: hidden; }
+
+        /* NAVBAR KHUSUS UJIAN (Sticky Timer) */
+        .exam-nav {
+            background: white; padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 3px solid var(--primary);
+        }
+        .timer-badge {
+            background: #ffebee; color: #c62828;
+            padding: 8px 20px; border-radius: 50px;
+            font-weight: 700; font-size: 1.2em;
+            border: 2px solid #ffcdd2;
+            display: flex; align-items: center; gap: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        /* LAYOUT UTAMA */
+        .exam-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px; /* Kiri Lebar, Kanan 320px */
+            gap: 25px;
+            margin-top: 30px;
+            align-items: start;
+        }
+
+        /* AREA SOAL (KIRI) */
+        .question-box {
+            background: white; border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            min-height: 400px;
+            position: relative;
+        }
+        .q-number-badge {
+            background: var(--primary); color: white;
+            padding: 5px 15px; border-radius: 8px;
+            font-weight: 600; display: inline-block;
+            margin-bottom: 20px;
+        }
+        .q-text { font-size: 1.2em; line-height: 1.6; margin-bottom: 30px; color: #333; }
         
-        <div class="ujian-header-bar">
-            <h2 id="question-badge">Soal #1</h2>
+        /* OPSI JAWABAN BESAR */
+        .option-card {
+            display: flex; align-items: center; gap: 15px;
+            background: #fff; border: 2px solid #eee;
+            padding: 15px 20px; border-radius: 12px;
+            margin-bottom: 12px; cursor: pointer;
+            transition: 0.2s; position: relative;
+        }
+        .option-card:hover { background: #f9f9f9; border-color: #ccc; }
+        
+        /* State Terpilih */
+        .option-card.selected {
+            background: #e3f2fd; border-color: var(--primary);
+            color: var(--primary); font-weight: 500;
+        }
+        .circle-label {
+            width: 30px; height: 30px;
+            background: #eee; color: #777;
+            border-radius: 50%; display: flex;
+            justify-content: center; align-items: center;
+            font-weight: bold; font-size: 0.9em;
+        }
+        .option-card.selected .circle-label {
+            background: var(--primary); color: white;
+        }
+
+        /* AREA NAVIGASI / LJK (KANAN) */
+        .nav-panel {
+            background: white; border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            position: sticky; top: 100px; /* Ikut scroll */
+        }
+        .nav-header { 
+            font-weight: 700; border-bottom: 2px solid #f0f0f0; 
+            padding-bottom: 10px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        /* GRID NOMOR (LJK) */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 Kolom */
+            gap: 10px;
+        }
+        .nav-item {
+            aspect-ratio: 1; /* Kotak Sempurna */
+            display: flex; justify-content: center; align-items: center;
+            border-radius: 8px; border: 1px solid #ddd;
+            font-weight: 600; cursor: pointer; transition: 0.2s;
+            background: white; color: #555;
+        }
+        .nav-item:hover { transform: scale(1.1); border-color: var(--primary); }
+        
+        /* Warna Status Nomor */
+        .nav-item.active { border: 2px solid var(--primary); color: var(--primary); } /* Sedang dibuka */
+        .nav-item.answered { background: var(--success); color: white; border-color: var(--success); } /* Sudah dijawab */
+
+        /* FOOTER NAVIGASI (Prev/Next/Finish) */
+        .footer-nav {
+            margin-top: 30px; display: flex; justify-content: space-between; gap: 15px;
+        }
+        .btn-nav {
+            padding: 12px 25px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-prev { background: #eee; color: #555; }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-finish { background: #e74c3c; color: white; width: 100%; justify-content: center; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+        /* RESPONSIF HP */
+        @media (max-width: 900px) {
+            .exam-layout { grid-template-columns: 1fr; } /* Jadi 1 kolom */
+            .nav-panel { order: 2; position: static; } /* Nav pindah ke bawah */
+            .question-box { order: 1; }
+            .timer-badge { font-size: 1em; padding: 5px 15px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;"> <nav class="exam-nav">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-name">Cendekia Aksara</span>
+            </div>
             
-            <div id="timer-display" class="timer-display">00:00:00</div>
-            
-            <button id="btn-giveup" class="btn btn-danger btn-sm" style="width:auto; padding: 8px 15px;">
-                <i class="fa-solid fa-flag"></i> Nyerah/Keluar
-            </button>
+            <div class="timer-badge">
+                <i class="fa-regular fa-clock"></i>
+                <span id="timer-display">00:00:00</span>
+            </div>
         </div>
+    </nav>
 
-        <div id="nav-grid-container"></div>
+    <div class="container exam-layout">
+        
+        <div class="question-box">
+            <div id="q-loading" style="text-align:center; padding:50px;">
+                <div class="spinner" style="margin:0 auto 10px auto;"></div>
+                <p>Membuka lembar soal...</p>
+            </div>
 
-        <div id="question-container">
-            <div class="item-card" style="text-align: center; padding: 40px;">
-                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
-                <p>Memuat soal...</p>
+            <div id="q-content" style="display: none;">
+                <div class="q-number-badge">Soal No. <span id="q-no">1</span></div>
+                
+                <div id="q-text" class="q-text">Pertanyaan akan muncul di sini...</div>
+
+                <div id="options-container">
+                    </div>
+
+                <div class="footer-nav">
+                    <button id="btn-prev" class="btn-nav btn-prev" onclick="prevQuestion()">
+                        <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                    </button>
+                    
+                    <button id="btn-next" class="btn-nav btn-next" onclick="nextQuestion()">
+                        Selanjutnya <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    
+                    <button id="btn-finish" class="btn-nav btn-finish" onclick="finishExam()" style="display: none;">
+                        <i class="fa-solid fa-flag-checkered"></i> KUMPULKAN JAWABAN
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="ujian-navigation-btns">
-            <button id="btn-prev" class="btn btn-secondary" style="width: auto;" disabled>
-                <i class="fa-solid fa-chevron-left"></i> Sebelumnya
-            </button>
+        <div class="nav-panel">
+            <div class="nav-header">
+                <span>Navigasi Soal</span>
+                <span style="font-size:0.8em; color:gray;" id="answered-count">0/0 Terjawab</span>
+            </div>
             
-            <button id="btn-flag" class="btn btn-warning" style="width: auto;">
-                <i class="fa-regular fa-flag"></i> Ragu-ragu
-            </button>
-            
-            <button id="btn-next" class="btn" style="width: auto;">
-                Lanjut <i class="fa-solid fa-chevron-right"></i>
-            </button>
+            <div id="nav-grid" class="nav-grid">
+                </div>
+
+            <div style="margin-top: 20px; font-size: 0.8em; color: #777; line-height: 1.5;">
+                <div style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
+                    <div style="width:15px; height:15px; background:#28a745; border-radius:3px;"></div> Sudah Dijawab
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <div style="width:15px; height:15px; border:1px solid #ddd; border-radius:3px;"></div> Belum Dijawab
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <div id="loading-overlay" class="hidden">
-        <div class="progress-spinner"></div>
-        <p>Memproses...</p>
-    </div>
-
     <script src="js/config.js"></script>
-    <script src="js/kuis-main.js"></script>
-
-</body>
+    <script src="js/kuis-main.js"></script> </body>
 </html>
