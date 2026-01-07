@@ -698,3 +698,57 @@ a { text-decoration: none; color: inherit; }
     border: 1px solid #ccc; outline: none;
 }
 .search-input:focus { border-color: var(--primary); }
+
+/* --- EDITOR SOAL (RICH TEXT) --- */
+.editor-container {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+.editor-toolbar {
+    background: #f8f9fa;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex; gap: 5px;
+}
+.btn-toolbar {
+    background: white; border: 1px solid #ccc;
+    padding: 5px 10px; border-radius: 4px; cursor: pointer;
+    font-weight: bold; font-family: serif;
+}
+.btn-toolbar:hover { background: #e2e6ea; }
+
+.editor-content {
+    min-height: 100px;
+    padding: 15px;
+    outline: none;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+/* Opsi Jawaban Modern */
+.option-item {
+    display: flex; align-items: center; gap: 10px;
+    background: #f9f9f9; padding: 10px;
+    border: 1px solid #eee; border-radius: 8px;
+    margin-bottom: 10px; transition: 0.2s;
+}
+.option-item:focus-within {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.radio-custom { transform: scale(1.5); cursor: pointer; }
+
+/* List Preview Soal */
+.question-card {
+    background: white; padding: 15px; border-radius: 8px;
+    border-left: 5px solid var(--primary);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 10px;
+    position: relative;
+}
+.q-delete-btn {
+    position: absolute; top: 10px; right: 10px;
+    color: #dc3545; cursor: pointer;
+}
