@@ -224,3 +224,10 @@ body {
     .card-text h3, .card-text p { text-align: center; }
     .card-arrow { display: none; }
 }
+
+/* PAKSA SEMBUNYI */
+.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
