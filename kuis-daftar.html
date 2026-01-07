@@ -14,25 +14,35 @@
 </head>
 <body>
 
-    <div class="container">
-        <a href="dashboard.html" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 20px; display: inline-block; text-decoration: none;">
-            <i class="fa-solid fa-arrow-left"></i> Kembali ke Dasbor
-        </a>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-name">Cendekia Aksara</span>
+            </div>
+            <a href="dashboard.html" class="btn-logout" style="color: var(--text-main); border-color: #ddd;">
+                <i class="fa-solid fa-arrow-left"></i> <span class="hide-mobile">Kembali</span>
+            </a>
+        </div>
+    </nav>
 
-        <div class="header">
-            <h2><i class="fa-solid fa-list-check"></i> Daftar Kuis Tersedia</h2>
-            <p>Pilih kuis untuk mulai mengerjakan.</p>
+    <div class="container dashboard-content">
+        
+        <div class="welcome-banner" style="padding: 30px; background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <div class="welcome-text">
+                <h1 style="margin: 0;">Daftar Kuis</h1>
+                <p class="subtitle" style="opacity: 1; color: #004070;">Pilih tantangan belajarmu hari ini.</p>
+            </div>
+            <div class="welcome-icon"><i class="fa-solid fa-layer-group"></i></div>
         </div>
 
-        <div id="kuis-list-container">
-            <p style="text-align: center; color: gray;">Sedang memuat data kuis...</p>
+        <div id="kuis-list-container" class="quiz-grid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                <div class="spinner" style="margin: 0 auto 10px auto; border-color: #ccc; border-top-color: #00bcd4;"></div>
+                <p style="color: #777;">Sedang memuat daftar kuis...</p>
+            </div>
         </div>
 
-    </div>
-
-    <div id="loading-overlay" class="hidden">
-        <div class="progress-spinner"></div>
-        <p>Memuat Data...</p>
     </div>
 
     <script src="js/config.js"></script>
