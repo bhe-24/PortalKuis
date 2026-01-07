@@ -39,7 +39,12 @@ function loadUserProfile(uid) {
 
 // 4. Logout
 document.getElementById('btn-logout').addEventListener('click', () => {
-    if(confirm("Yakin ingin keluar dari akun?")) {
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+    // Fungsi showConfirm mengembalikan true/false (Promise)
+    const yakin = await showConfirm("Konfirmasi Logout", "Apakah Anda yakin ingin keluar dari aplikasi?");
+    
+    if (yakin) {
+        showLoading();
         auth.signOut().then(() => {
             window.location.href = 'index.html';
         });
