@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Siswa - Cendekia Aksara</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--light-gray); padding-bottom: 15px; margin-bottom: 20px;">
+            <div>
+                <h2 style="text-align: left; margin: 0; color: var(--primary-color);">Cendekia Aksara</h2>
+                <p id="welcome-msg" style="margin: 5px 0 0 0; color: var(--gray-color);">Memuat profil...</p>
+            </div>
+            <button id="btn-logout" class="btn btn-danger btn-sm" style="width: auto;">
+                <i class="fa-solid fa-right-from-bracket"></i> Keluar
+            </button>
+        </div>
+
+        <div class="dashboard-grid">
+            <a href="kuis-daftar.html" style="text-decoration: none;">
+                <div class="dashboard-card kuis">
+                    <i class="fa-solid fa-list-check"></i>
+                    <h3>Daftar Kuis</h3>
+                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Kerjakan tugas & ujian</p>
+                </div>
+            </a>
+
+            <a href="#" onclick="alert('Fitur Arsip Nilai akan segera hadir!')" style="text-decoration: none;">
+                <div class="dashboard-card" style="background-image: linear-gradient(45deg, #17a2b8, #138496);">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <h3>Riwayat</h3>
+                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Lihat nilai sebelumnya</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="item-card" style="margin-top: 30px; background-color: #fff3cd; border-color: #ffeeba;">
+            <div class="card-header">
+                <h3 style="color: #856404;"><i class="fa-solid fa-bullhorn"></i> Info Penting</h3>
+            </div>
+            <p style="color: #856404;">Pastikan koneksi internet lancar sebelum memulai kuis. Jangan lupa berdoa!</p>
+        </div>
+
+    </div>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="progress-spinner"></div>
+        <p>Memproses...</p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/dashboard.js"></script>
+
+</body>
+</html>
