@@ -3,220 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sertifikat & Hasil - Cendekia Aksara</title>
+    <title>Hasil & Sertifikat - Cendekia Aksara</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        body { background-color: #f0f2f5; min-height: 100vh; padding: 20px; font-family: 'Poppins', sans-serif; }
-
-        /* LAYOUT UTAMA */
-        .main-layout {
-            display: flex; gap: 30px; justify-content: center; align-items: flex-start;
-            max-width: 1200px; margin: 0 auto;
-        }
-
-        /* --- KOLOM KIRI: HASIL --- */
-        .result-column { flex: 1; max-width: 400px; }
-
+        body { background-color: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; font-family: 'Poppins', sans-serif; }
+        
+        /* CARD HASIL */
         .result-card {
-            background: white; border-radius: 20px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; padding-bottom: 30px;
+            background: white; width: 100%; max-width: 450px;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center; padding-bottom: 30px;
         }
         .card-header-bg {
-            height: 100px; background: linear-gradient(135deg, #005a9c, #4facfe); position: relative;
+            height: 120px; background: linear-gradient(135deg, #005a9c, #4facfe); position: relative;
+        }
+        .card-header-bg::after {
+            content: ''; position: absolute; bottom: -20px; left: 0; right: 0;
+            height: 40px; background: white; border-radius: 50% 50% 0 0;
         }
         .score-circle {
-            width: 120px; height: 120px; background: white; border-radius: 50%;
-            margin: -60px auto 15px auto; position: relative; z-index: 2;
+            width: 130px; height: 130px; background: white; border-radius: 50%;
+            margin: -75px auto 15px auto; position: relative; z-index: 2;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 5px solid #f8f9fa;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15); border: 5px solid #f8f9fa;
         }
-        .score-val { font-size: 3em; font-weight: 700; color: #005a9c; line-height: 1; }
-        .score-label { font-size: 0.7em; color: #777; text-transform: uppercase; }
-        .status-badge { display: inline-block; padding: 5px 20px; border-radius: 50px; font-weight: 600; font-size: 0.85em; margin-bottom: 10px; }
+        .score-val { font-size: 3.2em; font-weight: 700; color: #005a9c; line-height: 1; }
+        .score-label { font-size: 0.7em; color: #777; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .status-badge { display: inline-block; padding: 6px 20px; border-radius: 50px; font-weight: 600; font-size: 0.9em; margin-bottom: 15px; }
         .status-lulus { background: #e6f7ec; color: #28a745; }
         .status-remed { background: #fdeeee; color: #dc3545; }
-        
-        /* Tombol */
-        .btn-full {
-            width: 100%; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
-            margin-bottom: 10px; border: none; font-size: 0.9em;
-        }
-        .btn-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: white; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
-        .btn-blue { background: #005a9c; color: white; }
-        .btn-outline { background: white; border: 1px solid #ddd; color: #555; }
-        .btn-full:hover { transform: translateY(-2px); opacity: 0.9; }
 
-        /* --- KOLOM KANAN: SERTIFIKAT --- */
-        .cert-column { 
-            flex: 2; display: flex; justify-content: center; align-items: center; 
-            perspective: 1000px;
+        .info-box { padding: 0 30px; margin-bottom: 30px; }
+        .quiz-title { font-size: 1.2em; font-weight: 700; color: #333; margin: 0; }
+        .student-name { color: #666; margin-top: 5px; }
+
+        /* BUTTON GROUP */
+        .btn-group {
+            display: flex; flex-direction: column; gap: 10px; padding: 0 30px;
         }
 
-        #certificate-node {
-            width: 800px; height: 565px; /* A5 Landscape Ratio */
-            background: white; position: relative; overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: 1px solid #ddd;
-            display: flex; flex-direction: column; align-items: center;
+        .btn-download-cert {
+            background: linear-gradient(135deg, #d4af37, #f1c40f);
+            color: white; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); transition: 0.2s;
         }
+        .btn-download-cert:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(212, 175, 55, 0.5); }
 
-        /* DESAIN SERTIFIKAT */
-        .cert-border-outer {
-            position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
-            border: 2px solid #d4af37; z-index: 1; pointer-events: none;
+        .btn-download-archive {
+            background: #005a9c;
+            color: white; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 90, 156, 0.3); transition: 0.2s;
         }
-        .corner-deco-tl {
-            position: absolute; top: 0; left: 0; width: 150px; height: 150px;
-            background: #1e3a5f; border-bottom-right-radius: 100%; z-index: 0;
-        }
-        .corner-deco-br {
-            position: absolute; bottom: 0; right: 0; width: 120px; height: 120px;
-            background: #d4af37; border-top-left-radius: 100%; opacity: 0.3; z-index: 0;
-        }
-        .corner-line-tr {
-            position: absolute; top: 20px; right: 20px; width: 100px; height: 100px;
-            border-top: 5px solid #d4af37; border-right: 5px solid #d4af37; z-index: 1;
-        }
+        .btn-download-archive:hover { background: #004a80; transform: translateY(-2px); }
 
-        /* Konten Sertifikat */
-        .cert-content { z-index: 2; text-align: center; width: 80%; margin-top: 60px; }
-        .cert-title { font-family: 'Cinzel', serif; font-size: 3.5em; color: #1e3a5f; letter-spacing: 5px; margin: 0; font-weight: 700; }
-        .cert-subtitle { font-family: 'Poppins', sans-serif; font-size: 1.2em; color: #555; margin-top: 10px; letter-spacing: 2px; }
+        .btn-back {
+            background: white; border: 1px solid #ddd; color: #555;
+            padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 5px;
+            font-weight: 500; transition: 0.2s;
+        }
+        .btn-back:hover { background: #f9f9f9; }
 
-        .cert-name {
-            font-family: 'Great Vibes', cursive; font-size: 4.5em; color: #d4af37;
-            margin: 10px 0 20px 0; text-shadow: 1px 1px 0px rgba(0,0,0,0.1); line-height: 1.2;
-            min-height: 80px;
-        }
-
-        .cert-body { font-family: 'Poppins', sans-serif; font-size: 0.9em; color: #666; line-height: 1.6; max-width: 600px; margin: 0 auto; }
-
-        /* Footer */
-        .cert-footer {
-            position: absolute; bottom: 40px; width: 80%;
-            display: flex; justify-content: space-between; align-items: flex-end; z-index: 2;
-        }
-        .sign-box { text-align: center; position: relative; width: 200px; }
-        .sign-line { border-top: 1px solid #333; margin-top: 60px; padding-top: 5px; font-weight: 700; color: #1e3a5f; }
-        .sign-role { font-size: 0.8em; color: #777; }
-        
-        /* LOGO & STAMP - Z-Index Tinggi */
-        .cert-logo {
-            position: absolute; top: 40px; right: 40px; width: 60px; opacity: 0.8; z-index: 10;
-        }
-        .stamp-img {
-            position: absolute; top: -40px; left: 50%; transform: translateX(-50%) rotate(-10deg);
-            width: 120px; opacity: 0.9; z-index: 10;
-        }
-
-        @media (max-width: 900px) {
-            .main-layout { flex-direction: column; align-items: center; }
-            .result-column { width: 100%; max-width: 100%; }
-            .cert-column { display: none; } 
-            #certificate-hidden-wrapper { position: absolute; left: -9999px; top: -9999px; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="main-layout">
-        
-        <div class="result-column">
-            <div class="result-card">
-                <div class="card-header-bg">
-                    <div style="padding-top: 20px; color: white; font-weight: 600;">
-                        <i class="fa-solid fa-graduation-cap"></i> Hasil Ujian
-                    </div>
-                </div>
-
-                <div class="score-circle">
-                    <span id="display-score" class="score-val">0</span>
-                    <span class="score-label">Nilai Akhir</span>
-                </div>
-
-                <div id="status-badge" class="status-badge status-lulus">MEMUAT...</div>
-                
-                <h3 id="res-quiz-title" style="margin: 10px 0 5px 0; color:#333;">...</h3>
-                <p id="res-student-name" style="color:#777; font-size:0.9em; margin-bottom:20px;">...</p>
-
-                <div style="padding: 0 20px;">
-                    <button onclick="downloadCertificate()" class="btn-full btn-gold">
-                        <i class="fa-solid fa-certificate"></i> Unduh Sertifikat (JPG)
-                    </button>
-                    <button onclick="downloadPDF()" class="btn-full btn-blue">
-                        <i class="fa-solid fa-file-pdf"></i> Unduh Arsip Soal (PDF)
-                    </button>
-                    <button onclick="window.location.href='dashboard.html'" class="btn-full btn-outline">
-                        Kembali ke Dashboard
-                    </button>
-                </div>
+    <div class="result-card">
+        <div class="card-header-bg">
+            <div style="padding-top: 30px; color: white; font-weight: 600; font-size: 1.1em;">
+                <i class="fa-solid fa-graduation-cap"></i> Hasil Ujian
             </div>
         </div>
 
-        <div class="cert-column" id="cert-preview-container">
-            <div id="certificate-node">
-                <div class="corner-deco-tl"></div>
-                <div class="corner-deco-br"></div>
-                <div class="corner-line-tr"></div>
-                <div class="cert-border-outer"></div>
-                
-                <img src="https://imgur.com/5Srjyo4.png" class="cert-logo" alt="Logo" crossorigin="anonymous">
-
-                <div class="cert-content">
-                    <h1 class="cert-title">SERTIFIKAT</h1>
-                    <div class="cert-subtitle">PENGHARGAAN PRESTASI</div>
-                    
-                    <p style="margin-top:20px; color:#555;">Diberikan dengan bangga kepada:</p>
-                    
-                    <div id="cert-student-name" class="cert-name">Nama Siswa</div>
-                    
-                    <div class="cert-body">
-                        Atas kelulusannya dalam menyelesaikan ujian kompetensi<br>
-                        <strong id="cert-quiz-name" style="color:#1e3a5f; font-size:1.1em;">Nama Kuis</strong><br>
-                        dengan predikat <strong id="cert-grade" style="color:#d4af37;">SANGAT BAIK</strong>.
-                    </div>
-                </div>
-
-                <div class="cert-footer">
-                    <div class="sign-box" style="text-align: left;">
-                        <p id="cert-date" style="margin-bottom: 5px; font-size:0.9em;">Yogyakarta, 20 Mei 2024</p>
-                    </div>
-
-                    <div class="sign-box">
-                        <img src="https://imgur.com/YvrNYRw.png" class="stamp-img" alt="Stamp" crossorigin="anonymous">
-                        
-                        <div class="sign-line">Cendekia Aksara</div>
-                        <div class="sign-role">Panitia Ujian</div>
-                    </div>
-                </div>
-            </div>
+        <div class="score-circle">
+            <span id="display-score" class="score-val">0</span>
+            <span class="score-label">Nilai Akhir</span>
         </div>
 
+        <div id="status-badge" class="status-badge status-lulus">Memuat...</div>
+
+        <div class="info-box">
+            <h3 id="res-quiz-title" class="quiz-title">...</h3>
+            <p id="res-student-name" class="student-name">...</p>
+        </div>
+
+        <div class="btn-group">
+            <button onclick="generateCertificatePDF()" class="btn-download-cert">
+                <i class="fa-solid fa-certificate"></i> Unduh Sertifikat Resmi
+            </button>
+
+            <button onclick="generateArchivePDF()" class="btn-download-archive">
+                <i class="fa-solid fa-file-pdf"></i> Unduh Arsip Soal
+            </button>
+
+            <button onclick="window.location.href='dashboard.html'" class="btn-back">
+                Kembali ke Dashboard
+            </button>
+        </div>
     </div>
 
-    <div id="mobile-render-helper" style="position:fixed; left:-9999px; top:0;"></div>
-
     <script src="js/config.js"></script>
+    
     <script>
+        // === GAMBAR UNTUK PDF (BASE64) ===
+        // Logo Cendekia & Stampel (Tanam langsung biar anti-hilang)
+        const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAQlBMVEVMaXEAAAAAAAAAAAAAAAB2dnZqamozMzMAAAAAAAA/Pz9/f3+ZmZlERERmZmZ3d3eIiIiqqqqzs7PMzMz9/f3///+r1aJDAAAABXRSTlM/3y/fL9/L1yIAAAJvSURBVHic7dvbloMgDAXgqKCAgFr//7+9t32orXhB4Jz71D6tE8hFCH8cAAAAAAAAAAAAAIC/53K5/TzP1/N5v91+Xq+Xy+15/t5uP6/Xy+V2+3n9Xq53G4/r9fL5Xb7eb1eLrfbz+v1crndfl6vl8v19vN4vV6/fL39PF6v18v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL1eLtfbz+P1erlcbz+P1+vlcr39PF6vl8v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL1eLtfbz+P1erlcbz+P1+vlcr39PF6vl8v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL1eLtfbz+P1erlcbz+P1+vlcr39PF6vl8v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL1eLtfbz+P1erlcbz+P1+vlcr39PF6vl8v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL1eLtfbz+P1erlcbz+P1+vlcr39PF6vl8v19vN4vV4u19vP4/V6uVxvP4/X6+Vyvf08Xq+Xy/X283i9Xi7X28/j9Xq5XG8/j9fr5XK9/Txer5fL9fbzeL3+z38DAAAAAAAAAAAAAPwFf1y2S/eJ+8sAAAAASUVORK5CYII=";
+        const STAMP_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAhFBMVEX///8mJiYPDw8bGxsZGRkKCgoWFhYTExMSEhIMDAwQEBAcHBwiIiIdHR0ODg4VFRUfHx8LCwsgICAlJSUNDQ0XFxcHBwcRERExMTFSUlJqamoAAAB/f3+mpqbe3t7y8vL5+fn8/Pz09PTs7Ozo6OjW1tbKysq+vr6zs7OSkpJwcHA9PT0j9P2lAAADQElEQVR4nO2a22LiMAxFrQIFyqm00Ew70/v/v3UCRaEtQ51L05i9n/rYsrEsyZYcJwQAAGhJ07Zt2/4n2qZp/h4Qyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH87wEQyv8eAKH8XzsA13Xdar1e1/Xq+wGu631c/e26/m09AO/T5dv1+7j+43oA3sfd179O39b/px6A9/Hw5W/X9YcegPfp+PnvD64H4H18/f7rJ9cD8D6d/v7t92/rAXgfj3//23X9pQfgfTr//YfrAXgfz//+63oA3qfL/3+4HoD3cf/f/3E9AO/T7f//dz0A7+Ppv//regDep8f//r8egPfx8t//dz0A79Pz//+vB+B9vP33/10PwPt0//f/XQ/A+3j//6/rAXifnv//f9cD8D4+//f/XQ/A+/T6//+uB+B9fP7v/7segPfp/f//rgfgfXz/7/+7HoD36fPv/7segPfx+//+v+sBeJ++/9/1ALyP7//3/10PwPv0/f+uB+B9fP+/6wF4H9//7/1ALxP3//vegDex/f/ux6A9+n7/10PwPv4/n/XA/A+ff+/6wF4H9//73oA3qfv/3c9AO/j+//9f9cD8D59/7/rAXgf3//v/7segPfp+/9dD8D7+P5/1wPwPn3/v+sBeB/f/+96AN6n7/93PQDv4/v/XQ/A+/T9/64H4H18/7/rAXifvv/f9QC8j+//dz0A79P3/7segPfx/f+uB+B9+v5/1wPwPr7/3/UAvE/f/+96AN7H9/+7HoD36fv/XQ/A+/j+f9cD8D59/7/rAXgf3//vegDep+//dz0A7+P7/10PwPv0/f+uB+B9fP+/6wF4n77/3/UAvI/v/3c9gP8D27Zt27Zt2/4l/gB+i+qulL+H2gAAAABJRU5ErkJggg==";
+
         const urlParams = new URLSearchParams(window.location.search);
         const paramQid = urlParams.get('qid');
 
         let globalQuizData = null;
         let globalSubmissionData = null;
 
+        // 1. CEK LOGIN DAN AMBIL DATA
         auth.onAuthStateChanged(async user => {
             if (!user) { window.location.href = 'index.html'; return; }
             if(!paramQid) { window.location.href = 'dashboard.html'; return; }
@@ -224,14 +139,14 @@
             if(typeof showLoading === 'function') showLoading();
 
             try {
-                // Ambil Nama Real
+                // Ambil Nama Asli
                 let realStudentName = user.displayName;
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if(userDoc.exists && userDoc.data().name) {
                     realStudentName = userDoc.data().name;
                 }
 
-                // Ambil Nilai
+                // Ambil Nilai (No Index)
                 const subQuery = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .where('quizId', '==', paramQid)
@@ -239,132 +154,201 @@
 
                 if (subQuery.empty) throw new Error("Data ujian tidak ditemukan.");
 
+                // Manual Sort (Terbaru)
                 let submissions = [];
                 subQuery.forEach(doc => submissions.push(doc.data()));
                 submissions.sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
                 
                 globalSubmissionData = submissions[0];
 
-                // Ambil Kuis
+                // Ambil Judul Kuis
                 const quizDoc = await db.collection('quizzes').doc(paramQid).get();
-                if (!quizDoc.exists) throw new Error("Data soal kuis hilang.");
-                globalQuizData = quizDoc.data();
+                globalQuizData = quizDoc.exists ? quizDoc.data() : { title: "Kuis Online" };
 
-                updateUI(globalSubmissionData, realStudentName);
+                // Tampilkan Info di Layar
+                renderCardHTML(globalSubmissionData, realStudentName);
 
             } catch (err) {
                 console.error(err);
-                alert("Gagal: " + err.message);
+                alert("Error: " + err.message);
             } finally {
                 if(typeof hideLoading === 'function') hideLoading();
             }
         });
 
-        function updateUI(data, userName) {
-            const finalName = userName || data.studentName || "Siswa Cendekia";
-            
-            // Update Kartu Kiri
+        function renderCardHTML(data, name) {
             document.getElementById('display-score').textContent = data.score;
             document.getElementById('res-quiz-title').textContent = data.quizTitle;
-            document.getElementById('res-student-name').textContent = finalName;
+            document.getElementById('res-student-name').textContent = name || data.studentName;
 
             const badge = document.getElementById('status-badge');
-            let predikat = "BAIK";
-            
-            if (data.score >= 85) {
-                badge.className = "status-badge status-lulus"; badge.textContent = "LULUS (A)"; predikat = "SANGAT MEMUASKAN";
-            } else if (data.score >= 70) {
-                badge.className = "status-badge status-lulus"; badge.textContent = "LULUS (B)"; predikat = "BAIK";
+            if (data.score >= 70) {
+                badge.className = "status-badge status-lulus"; badge.textContent = "LULUS / KOMPETEN";
             } else {
-                badge.className = "status-badge status-remed"; badge.textContent = "REMEDIAL"; predikat = "CUKUP";
+                badge.className = "status-badge status-remed"; badge.textContent = "BELUM LULUS";
             }
-
-            // Update Sertifikat
-            document.getElementById('cert-student-name').textContent = finalName;
-            document.getElementById('cert-quiz-name').textContent = data.quizTitle;
-            document.getElementById('cert-grade').textContent = predikat;
-            
-            const dateObj = data.submittedAt ? data.submittedAt.toDate() : new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('cert-date').textContent = "Yogyakarta, " + dateObj.toLocaleDateString('id-ID', options);
         }
 
-        function downloadCertificate() {
-            const certNode = document.getElementById('certificate-node');
-            const mobileWrapper = document.getElementById('mobile-render-helper');
-            const previewContainer = document.getElementById('cert-preview-container');
-            const isMobile = window.getComputedStyle(previewContainer).display === 'none';
-
-            if (isMobile) mobileWrapper.appendChild(certNode);
+        // ============================================
+        // FUNGSI 1: DOWNLOAD SERTIFIKAT (A5 Landscape)
+        // ============================================
+        function generateCertificatePDF() {
+            if (!globalSubmissionData) return;
             if(typeof showLoading === 'function') showLoading();
 
-            // PENTING: useCORS: true agar gambar dari luar bisa dirender
-            html2canvas(certNode, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Sertifikat_${globalSubmissionData.quizTitle}.jpg`;
-                link.href = canvas.toDataURL("image/jpeg", 0.9);
-                link.click();
-                if (isMobile) previewContainer.appendChild(certNode);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a5');
+                const width = doc.internal.pageSize.getWidth();
+                const height = doc.internal.pageSize.getHeight();
+
+                // Background
+                doc.setDrawColor(212, 175, 55); doc.setLineWidth(2);
+                doc.rect(5, 5, width - 10, height - 10);
+                doc.setDrawColor(30, 58, 95); doc.setLineWidth(0.5);
+                doc.rect(8, 8, width - 16, height - 16);
+
+                // Sudut
+                doc.setFillColor(30, 58, 95); doc.triangle(5, 5, 30, 5, 5, 30, 'F');
+                doc.setFillColor(212, 175, 55); doc.triangle(width-5, height-5, width-30, height-5, width-5, height-30, 'F');
+
+                // Logo
+                doc.addImage(LOGO_BASE64, 'PNG', width - 35, 15, 20, 20);
+
+                // Teks
+                doc.setTextColor(30, 58, 95); doc.setFont("times", "bold"); doc.setFontSize(26);
+                doc.text("SERTIFIKAT", width / 2, 35, { align: "center" });
+                
+                doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setCharSpace(2);
+                doc.text("PENGHARGAAN PRESTASI", width / 2, 42, { align: "center" });
+
+                doc.setTextColor(80, 80, 80); doc.setCharSpace(0); doc.setFontSize(10);
+                doc.text("Diberikan dengan bangga kepada:", width / 2, 55, { align: "center" });
+
+                // Nama Siswa
+                const studentName = document.getElementById('res-student-name').textContent;
+                doc.setTextColor(212, 175, 55); doc.setFont("times", "italic"); doc.setFontSize(32);
+                doc.text(studentName, width / 2, 70, { align: "center" });
+                doc.setDrawColor(30, 58, 95); doc.setLineWidth(0.5);
+                doc.line((width/2)-40, 73, (width/2)+40, 73);
+
+                // Info Kuis
+                doc.setTextColor(60, 60, 60); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+                doc.text("Atas kelulusannya dalam menyelesaikan ujian kompetensi:", width / 2, 85, { align: "center" });
+                
+                doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(30, 58, 95);
+                doc.text(globalSubmissionData.quizTitle, width / 2, 92, { align: "center" });
+
+                let predikat = globalSubmissionData.score >= 85 ? "SANGAT MEMUASKAN" : (globalSubmissionData.score >= 70 ? "BAIK" : "CUKUP");
+                doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(60, 60, 60);
+                doc.text(`dengan predikat: ${predikat} (Nilai: ${globalSubmissionData.score})`, width / 2, 99, { align: "center" });
+
+                // TTD & Stamp
+                const dateObj = globalSubmissionData.submittedAt ? globalSubmissionData.submittedAt.toDate() : new Date();
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                
+                doc.setFontSize(9);
+                doc.text(`Yogyakarta, ${dateStr}`, 30, 120);
+                doc.text("Panitia Ujian", width - 40, 120, { align: "center" });
+                doc.addImage(STAMP_BASE64, 'PNG', width - 55, 115, 30, 30);
+                doc.setFont("helvetica", "bold");
+                doc.text("Cendekia Aksara", width - 40, 138, { align: "center" });
+
+                doc.save(`Sertifikat_${globalSubmissionData.quizTitle}.pdf`);
+
+            } catch (err) {
+                console.error(err); alert("Gagal membuat Sertifikat.");
+            } finally {
                 if(typeof hideLoading === 'function') hideLoading();
-            }).catch(err => {
-                console.error(err);
-                if(typeof hideLoading === 'function') hideLoading();
-                alert("Gagal mencetak. Gambar eksternal mungkin diblokir browser.");
-                if (isMobile) previewContainer.appendChild(certNode);
-            });
+            }
         }
-        
-        // (Fungsi downloadPDF sama seperti sebelumnya)
-        async function downloadPDF() {
-            if (!globalQuizData || !globalSubmissionData) return alert("Data belum siap.");
+
+        // ============================================
+        // FUNGSI 2: DOWNLOAD ARSIP SOAL (A4 Portrait)
+        // ============================================
+        function generateArchivePDF() {
+            if (!globalQuizData) return alert("Data soal belum siap.");
             if(typeof showLoading === 'function') showLoading();
 
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
                 const margin = 15;
-                let y = 20; const pageWidth = doc.internal.pageSize.getWidth();
+                let y = 20; 
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const contentWidth = pageWidth - (margin * 2);
 
+                // HEADER
                 doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(0, 90, 156);
                 doc.text("ARSIP HASIL UJIAN", pageWidth/2, y, {align:'center'}); y += 15;
                 
+                // INFO SISWA
                 doc.setFontSize(10); doc.setTextColor(0); doc.setFont('helvetica', 'normal');
-                doc.text(`Nama: ${globalSubmissionData.studentName || 'Siswa'}`, margin, y); y+=5;
-                doc.text(`Kuis: ${globalQuizData.title}`, margin, y); y+=5;
-                doc.text(`Nilai: ${globalSubmissionData.score}`, margin, y); y+=10;
-                doc.line(margin, y, pageWidth-margin, y); y+=10;
+                const name = document.getElementById('res-student-name').textContent;
+                doc.text(`Nama : ${name}`, margin, y); y+=6;
+                doc.text(`Kuis : ${globalQuizData.title}`, margin, y); y+=6;
+                doc.text(`Nilai : ${globalSubmissionData.score}`, margin, y); y+=10;
+                
+                doc.setDrawColor(200); doc.line(margin, y, pageWidth-margin, y); y+=10;
 
+                // LOOP SOAL
                 const questions = globalQuizData.questions;
                 const userAns = globalSubmissionData.answers || {};
 
                 questions.forEach((q, index) => {
-                    const studentChoice = userAns[index];
-                    const correctChoice = parseInt(q.correctAnswerIndex);
-                    
+                    // Cek Ganti Halaman
                     if (y > 270) { doc.addPage(); y = 20; }
                     
+                    // Teks Soal
                     doc.setFont('helvetica', 'bold');
-                    const qText = `${index + 1}. ${q.questionText.replace(/<[^>]*>?/gm, '')}`;
-                    const splitTitle = doc.splitTextToSize(qText, pageWidth-(margin*2));
-                    doc.text(splitTitle, margin, y); y += (splitTitle.length * 5) + 3;
+                    const qNo = `${index + 1}. `;
+                    const cleanQ = q.questionText.replace(/<[^>]*>?/gm, ''); // Hapus tag HTML
+                    const qLines = doc.splitTextToSize(cleanQ, contentWidth - 10);
+                    
+                    doc.text(qNo, margin, y);
+                    doc.text(qLines, margin + 7, y);
+                    
+                    y += (qLines.length * 5) + 3;
 
+                    // Opsi Jawaban
                     doc.setFont('helvetica', 'normal');
+                    const studentChoice = userAns[index];
+                    const correctChoice = parseInt(q.correctAnswerIndex);
+
                     q.options.forEach((opt, i) => {
-                        let prefix = (i === studentChoice) ? "(x) " : "( ) ";
-                        let color = [0,0,0];
-                        if (i === correctChoice) { color = [0,150,0]; prefix="(KUNCI) "; }
-                        if (i === studentChoice && i !== correctChoice) { color = [200,0,0]; prefix="(JAWABANMU) "; }
-                        
+                        let prefix = "( ) ";
+                        let color = [0, 0, 0]; // Hitam (Default)
+
+                        // Logika Warna
+                        if (i === studentChoice) {
+                            prefix = "(x) "; // Jawaban Siswa
+                            if (i !== correctChoice) color = [200, 0, 0]; // Salah (Merah)
+                        }
+                        if (i === correctChoice) {
+                            prefix = "(KUNCI) "; // Kunci (Hijau)
+                            color = [0, 150, 0];
+                        }
+
                         doc.setTextColor(color[0], color[1], color[2]);
-                        const optText = doc.splitTextToSize(`${String.fromCharCode(65+i)}. ${opt}`, pageWidth-(margin*2)-10);
-                        doc.text(prefix, margin+2, y); doc.text(optText, margin+25, y);
+                        
+                        // Wrap teks opsi jika panjang
+                        const optText = doc.splitTextToSize(`${String.fromCharCode(65+i)}. ${opt}`, contentWidth - 15);
+                        doc.text(prefix, margin + 7, y);
+                        doc.text(optText, margin + 25, y);
+                        
                         y += (optText.length * 5) + 1;
                     });
-                    doc.setTextColor(0); y+=5;
+                    
+                    doc.setTextColor(0); // Reset Hitam
+                    y += 5; // Spasi antar soal
                 });
-                doc.save(`Arsip_${globalQuizData.title}.pdf`);
-            } catch (err) { console.error(err); alert("PDF Error"); }
-            finally { if(typeof hideLoading === 'function') hideLoading(); }
+                
+                doc.save(`Arsip_${globalSubmissionData.quizTitle}.pdf`);
+            } catch (err) { 
+                console.error(err); alert("Gagal membuat Arsip Soal."); 
+            } finally { 
+                if(typeof hideLoading === 'function') hideLoading(); 
+            }
         }
     </script>
 </body>
