@@ -4,260 +4,246 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Saya - Cendekia Aksara</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
-        /* LAYOUT PROFIL */
+        /* CSS Khusus Halaman Profil (Tema Soft Aura) */
+        body { 
+            background-color: #f0f2f5; 
+            min-height: 100vh; 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
+
+        /* Background Animasi */
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: #f8fbff; overflow: hidden;
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+            animation: float 20s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #a1c4fd; }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: #c2e9fb; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* Navbar Sederhana */
+        .simple-nav {
+            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
+            position: absolute; top: 0; width: 100%; box-sizing: border-box; z-index: 10;
+        }
+        .nav-brand { font-weight: 700; color: #005a9c; font-size: 1.2em; display: flex; align-items: center; gap: 10px; }
+        .btn-back-dash { 
+            text-decoration: none; color: #555; font-weight: 500; 
+            display: flex; align-items: center; gap: 8px; transition:0.3s; 
+        }
+        .btn-back-dash:hover { color: #005a9c; }
+
+        /* Container Profile */
         .profile-container {
-            background: white; border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            padding: 40px; display: flex; gap: 40px;
-            align-items: flex-start; margin-top: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 80px 20px 40px 20px;
         }
-        .avatar-section { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .avatar-box {
-            width: 180px; height: 180px; border-radius: 50%;
-            overflow: hidden; border: 5px solid #f0f0f0;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px;
-            background-color: #e3f2fd; transition: 0.3s;
+
+        .profile-card {
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.6);
+            width: 100%; max-width: 800px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex; flex-direction: column;
         }
-        .avatar-box:hover { border-color: var(--primary); transform: scale(1.05); }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Header Profile (Cover) */
+        .p-header {
+            height: 150px; background: linear-gradient(135deg, #005a9c, #4facfe);
+            position: relative;
+        }
         
-        .role-badge {
-            background: var(--primary); color: white;
-            padding: 5px 15px; border-radius: 50px;
-            font-size: 0.9em; font-weight: 600; margin-top: 10px; display: inline-block;
+        /* Foto & Info Utama */
+        .p-body {
+            padding: 0 40px 40px 40px; position: relative; text-align: center;
         }
-        .form-section { flex: 2; }
-        .form-group label { font-size: 0.9em; color: #666; font-weight: 500; }
-        .alert-box {
-            background: #fff3cd; color: #856404; padding: 15px;
-            border-radius: 10px; border: 1px solid #ffeeba; margin-bottom: 20px;
-            font-size: 0.9em; display: flex; align-items: center; gap: 10px;
+        .p-avatar {
+            width: 140px; height: 140px; border-radius: 50%;
+            border: 5px solid white; background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: -70px auto 15px auto; position: relative;
+            object-fit: cover;
+        }
+        
+        .p-name { font-size: 1.8em; font-weight: 700; color: #333; margin: 0; }
+        .p-email { color: #777; margin-bottom: 20px; }
+        .p-role-badge { 
+            background: #e3f2fd; color: #005a9c; padding: 5px 15px; 
+            border-radius: 50px; font-size: 0.85em; font-weight: 600;
+        }
+
+        /* Grid Info Detail */
+        .p-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+            margin-top: 30px; text-align: left;
+        }
+        .p-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .p-label { display: block; font-size: 0.85em; color: #999; margin-bottom: 5px; font-weight: 600; }
+        .p-val { font-size: 1.1em; color: #333; font-weight: 500; }
+        .p-icon { color: #005a9c; margin-right: 8px; }
+
+        /* Form Edit (Hidden by default) */
+        .edit-form { display: none; margin-top: 20px; text-align: left; }
+        .form-group { margin-bottom: 15px; }
+        .form-input { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; 
+            border-radius: 10px; box-sizing: border-box; font-family: inherit;
+        }
+
+        /* Tombol */
+        .btn-action {
+            padding: 12px 25px; border-radius: 50px; border: none; cursor: pointer;
+            font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: #005a9c; color: white; box-shadow: 0 5px 15px rgba(0,90,156,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); background: #004a80; }
+        
+        .btn-danger { background: #ffebee; color: #d32f2f; }
+        .btn-danger:hover { background: #ffcdd2; }
+
+        .loading-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: white; z-index: 50; display: flex; 
+            justify-content: center; align-items: center; flex-direction: column;
         }
 
         @media (max-width: 768px) {
-            .profile-container { flex-direction: column; padding: 25px; }
-            .avatar-section { width: 100%; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-            .form-section { width: 100%; }
+            .p-grid { grid-template-columns: 1fr; }
+            .simple-nav { padding: 15px 20px; }
+            .p-body { padding: 0 20px 30px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="container nav-container">
-            <div class="nav-brand">
-                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
-                <span class="brand-name">Cendekia Aksara</span>
-            </div>
-            <a href="dashboard.html" class="btn-logout" style="color: #333; border-color: #ddd;">
-                <i class="fa-solid fa-arrow-left"></i> Kembali
-            </a>
+    <div class="animated-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <nav class="simple-nav">
+        <div class="nav-brand">
+            <img src="https://imgur.com/5Srjyo4.png" width="35" alt="Logo">
+            Cendekia
         </div>
+        <a href="dashboard.html" class="btn-back-dash">
+            <i class="fa-solid fa-arrow-left"></i> <span class="hide-mobile">Dashboard</span>
+        </a>
     </nav>
 
-    <div class="container dashboard-content">
-        <div class="welcome-banner" style="background: linear-gradient(135deg, #43e97b, #38f9d7); padding: 30px;">
-            <div class="welcome-text">
-                <h1 style="margin: 0;">Profil Saya</h1>
-                <p class="subtitle" style="color: #005a9c; opacity: 1;">Pastikan data diri Anda sudah benar.</p>
-            </div>
-            <div class="welcome-icon"><i class="fa-solid fa-id-card-clip" style="color: rgba(255,255,255,0.4);"></i></div>
-        </div>
-
-        <div class="profile-container">
+    <div class="profile-container">
+        <div class="profile-card">
             
-            <div class="avatar-section">
-                <div class="avatar-box">
-                    <img id="avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=loading" alt="Avatar">
-                </div>
-                <h3 id="display-name" style="margin: 0;">Memuat...</h3>
-                <span id="display-role" class="role-badge">SISWA</span>
-                <p style="font-size: 0.8em; color: gray; margin-top: 10px;">Avatar otomatis dari sistem.</p>
+            <div id="p-loading" class="loading-overlay">
+                <div class="spinner"></div>
+                <p style="margin-top:15px; color:#666;">Mengambil data profil...</p>
             </div>
 
-            <div class="form-section">
-                
-                <div id="incomplete-alert" class="alert-box hidden">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span><strong>Data Belum Lengkap!</strong> Harap isi Jenis Kelamin, Umur, dan Semester.</span>
-                </div>
+            <div class="p-header"></div>
 
-                <form id="profile-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Nama Lengkap</label>
-                            <input type="text" id="p-name" class="modal-input-field" required>
+            <div class="p-body">
+                <img id="p-avatar" src="" class="p-avatar" alt="Avatar">
+                
+                <div id="view-mode">
+                    <h1 id="p-name" class="p-name">...</h1>
+                    <p id="p-email" class="p-email">...</p>
+                    <span id="p-role" class="p-role-badge">Siswa</span>
+
+                    <div class="p-grid">
+                        <div class="p-item">
+                            <span class="p-label">SEMESTER</span>
+                            <div class="p-val"><i class="fa-solid fa-graduation-cap p-icon"></i> <span id="p-smt">-</span></div>
                         </div>
-                        <div class="form-group">
-                            <label>Email (Akun)</label>
-                            <input type="email" id="p-email" class="modal-input-field" disabled style="background:#f9f9f9; cursor:not-allowed;">
+                        <div class="p-item">
+                            <span class="p-label">JENIS KELAMIN</span>
+                            <div class="p-val"><i class="fa-solid fa-venus-mars p-icon"></i> <span id="p-gender">-</span></div>
+                        </div>
+                        <div class="p-item">
+                            <span class="p-label">ALAMAT</span>
+                            <div class="p-val"><i class="fa-solid fa-location-dot p-icon"></i> <span id="p-address">-</span></div>
+                        </div>
+                        <div class="p-item">
+                            <span class="p-label">STATISTIK</span>
+                            <div class="p-val"><i class="fa-solid fa-star p-icon"></i> <span id="p-stats">0 Kuis</span></div>
                         </div>
                     </div>
 
-                    <hr style="border: 0; border-top: 1px dashed #ddd; margin: 10px 0 20px 0;">
+                    <div style="margin-top: 40px; display: flex; justify-content: center; gap: 15px;">
+                        <button onclick="toggleEdit(true)" class="btn-action btn-primary">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit Profil
+                        </button>
+                        <button onclick="logoutUser()" class="btn-action btn-danger">
+                            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                        </button>
+                    </div>
+                </div>
 
+                <div id="edit-mode" class="edit-form">
+                    <h3 style="margin-top:0;">Edit Biodata</h3>
+                    
                     <div class="form-group">
-                        <label>Jenis Kelamin <span style="color:red">*</span></label>
-                        <select id="p-gender" class="modal-input-field" required onchange="updateAvatar(this.value)">
-                            <option value="" disabled selected>-- Pilih --</option>
+                        <label class="p-label">Nama Lengkap</label>
+                        <input type="text" id="edit-name" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="p-label">Semester</label>
+                        <select id="edit-smt" class="form-input">
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="p-label">Jenis Kelamin</label>
+                        <select id="edit-gender" class="form-input">
                             <option value="Laki-laki">Laki-laki</option>
                             <option value="Perempuan">Perempuan</option>
                         </select>
                     </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Umur (Tahun) <span style="color:red">*</span></label>
-                            <input type="number" id="p-age" class="modal-input-field" placeholder="Contoh: 17" required min="5" max="99">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Semester Saat Ini <span style="color:red">*</span></label>
-                            <select id="p-semester" class="modal-input-field" required>
-                                <option value="" disabled selected>-- Pilih Semester --</option>
-                                <option value="Semester 1">Semester 1</option>
-                                <option value="Semester 2">Semester 2</option>
-                                <option value="Semester 3">Semester 3</option>
-                                <option value="Semester 4">Semester 4</option>
-                                <option value="Semester 5">Semester 5</option>
-                                <option value="Semester 6">Semester 6</option>
-                                <option value="Semester 7">Semester 7</option>
-                                <option value="Semester 8">Semester 8</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label>Alamat / Kota</label>
-                        <input type="text" id="p-address" class="modal-input-field" placeholder="Contoh: Yogyakarta">
+                        <label class="p-label">Alamat</label>
+                        <textarea id="edit-address" class="form-input" rows="3"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">
-                        <i class="fa-solid fa-floppy-disk"></i> SIMPAN PERMANEN
-                    </button>
-                </form>
-            </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button onclick="saveProfile()" class="btn-action btn-primary">
+                            <i class="fa-solid fa-save"></i> Simpan
+                        </button>
+                        <button onclick="toggleEdit(false)" class="btn-action" style="background:#eee; color:#333;">
+                            Batal
+                        </button>
+                    </div>
+                </div>
 
+            </div>
         </div>
     </div>
 
     <script src="js/config.js"></script>
-    <script>
-        let uid = null;
-        
-        auth.onAuthStateChanged(async user => {
-            if(!user) { window.location.href = 'index.html'; return; }
-            uid = user.uid;
-            
-            showLoading(); // Blur Effect
-
-            try {
-                const doc = await db.collection('users').doc(uid).get();
-                if(doc.exists) {
-                    const data = doc.data();
-                    
-                    // Isi Form
-                    document.getElementById('p-email').value = data.email || '';
-                    document.getElementById('p-name').value = data.name || '';
-                    document.getElementById('display-name').textContent = data.name || 'Siswa';
-                    document.getElementById('display-role').textContent = (data.role || 'SISWA').toUpperCase();
-
-                    // Load Data Tersimpan (Permanen)
-                    if(data.gender) document.getElementById('p-gender').value = data.gender;
-                    if(data.age) document.getElementById('p-age').value = data.age;
-                    if(data.address) document.getElementById('p-address').value = data.address;
-                    
-                    // Load Semester
-                    if(data.semester) {
-                        document.getElementById('p-semester').value = data.semester;
-                    }
-
-                    // Update Avatar
-                    updateAvatar(data.gender);
-
-                    // Cek Kelengkapan Data (Wajib Semester, Umur, Gender)
-                    if (!data.gender || !data.age || !data.semester) {
-                        document.getElementById('incomplete-alert').classList.remove('hidden');
-                        
-                        // POP UP WAJIB ISI
-                        await showAlert(
-                            "Lengkapi Profil", 
-                            "Mohon lengkapi data <b>Jenis Kelamin, Umur, dan Semester</b> agar data Anda tersimpan permanen.", 
-                            "info"
-                        );
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-                showAlert("Error", "Gagal memuat profil.", "error");
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // FUNGSI AVATAR BARU (FIX PEREMPUAN)
-        function updateAvatar(gender) {
-            const imgEl = document.getElementById('avatar-img');
-            // Gunakan UID sebagai seed agar gambar konsisten per user
-            let seed = uid ? uid : 'randomseed'; 
-            
-            if (gender === 'Laki-laki') {
-                // Cowok: Rambut pendek
-                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&top=shortHair,shortFlat,shortRound,shavedSides&hairColor=2c1b18`;
-            } else if (gender === 'Perempuan') {
-                // Cewek: Rambut Panjang (Dipaksa pakai parameter 'top')
-                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&top=longHair,straight01,straight02,bun,curvy&hairColor=2c1b18&clothe=blazerAndShirt`;
-            } else {
-                // Netral
-                imgEl.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
-            }
-        }
-
-        // SIMPAN PERMANEN
-        document.getElementById('profile-form').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('p-name').value;
-            const gender = document.getElementById('p-gender').value;
-            const age = document.getElementById('p-age').value;
-            const semester = document.getElementById('p-semester').value;
-            const address = document.getElementById('p-address').value;
-
-            const yakin = await showConfirm("Simpan Permanen?", "Data yang disimpan akan menjadi data tetap Anda.");
-            
-            if(yakin) {
-                showLoading();
-                try {
-                    // Update ke Firebase (Permanen)
-                    await db.collection('users').doc(uid).update({ 
-                        name: name,
-                        gender: gender,
-                        age: age,
-                        semester: semester, // Simpan Semester
-                        address: address
-                    });
-                    
-                    document.getElementById('display-name').textContent = name;
-                    document.getElementById('incomplete-alert').classList.add('hidden');
-                    updateAvatar(gender); // Refresh avatar sesuai gender baru
-                    
-                    hideLoading();
-                    await showAlert("Tersimpan!", "Data profil Anda aman dan tersimpan selamanya.", "success");
-                    
-                } catch (err) {
-                    hideLoading();
-                    showAlert("Gagal", "Terjadi kesalahan koneksi.", "error");
-                }
-            }
-        }
-    </script>
-</body>
+    <script src="js/profile.js"></script> </body>
 </html>
