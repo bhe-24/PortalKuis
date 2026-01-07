@@ -14,47 +14,59 @@
 </head>
 <body>
 
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--light-gray); padding-bottom: 15px; margin-bottom: 20px;">
-            <div>
-                <h2 style="text-align: left; margin: 0; color: var(--primary-color);">Cendekia Aksara</h2>
-                <p id="welcome-msg" style="margin: 5px 0 0 0; color: var(--gray-color);">Memuat profil...</p>
-            </div>
-            <button id="btn-logout" class="btn btn-danger btn-sm" style="width: auto;">
-                <i class="fa-solid fa-right-from-bracket"></i> Keluar
-            </button>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+            <span class="nav-title">Cendekia Aksara</span>
+        </div>
+        <button id="btn-logout" class="btn-logout-nav">
+            <i class="fa-solid fa-right-from-bracket"></i> <span class="logout-text">Keluar</span>
+        </button>
+    </nav>
+
+    <div class="container dashboard-container">
+        
+        <div class="welcome-section">
+            <p class="date-display" id="date-display">Senin, 1 Januari 2024</p>
+            <h1 id="student-name">Halo, Siswa...</h1>
+            <p class="subtitle">Siap untuk belajar hal baru hari ini?</p>
         </div>
 
         <div class="dashboard-grid">
-            <a href="kuis-daftar.html" style="text-decoration: none;">
-                <div class="dashboard-card kuis">
-                    <i class="fa-solid fa-list-check"></i>
+            
+            <a href="kuis-daftar.html" class="menu-card card-blue">
+                <div class="card-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+                <div class="card-text">
                     <h3>Daftar Kuis</h3>
-                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Kerjakan tugas & ujian</p>
+                    <p>Kerjakan tugas & ujian yang tersedia.</p>
                 </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
             </a>
 
-            <a href="#" onclick="alert('Fitur Arsip Nilai akan segera hadir!')" style="text-decoration: none;">
-                <div class="dashboard-card" style="background-image: linear-gradient(45deg, #17a2b8, #138496);">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <h3>Riwayat</h3>
-                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Lihat nilai sebelumnya</p>
+            <div class="menu-card card-purple" onclick="alert('Fitur Arsip Nilai sedang dalam pengembangan!')">
+                <div class="card-icon"><i class="fa-solid fa-trophy"></i></div>
+                <div class="card-text">
+                    <h3>Lihat Nilai</h3>
+                    <p>Cek riwayat hasil belajarmu.</p>
                 </div>
-            </a>
-        </div>
-        
-        <div class="item-card" style="margin-top: 30px; background-color: #fff3cd; border-color: #ffeeba;">
-            <div class="card-header">
-                <h3 style="color: #856404;"><i class="fa-solid fa-bullhorn"></i> Info Penting</h3>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
             </div>
-            <p style="color: #856404;">Pastikan koneksi internet lancar sebelum memulai kuis. Jangan lupa berdoa!</p>
-        </div>
 
+            <div class="menu-card card-orange" onclick="alert('Fitur Profil sedang dalam pengembangan!')">
+                <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="card-text">
+                    <h3>Profil Saya</h3>
+                    <p>Data diri dan pengaturan akun.</p>
+                </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+
+        </div>
     </div>
 
     <div id="loading-overlay" class="hidden">
-        <div class="progress-spinner"></div>
-        <p>Memproses...</p>
+        <div class="spinner"></div>
+        <p>Memuat Profil...</p>
     </div>
 
     <script src="js/config.js"></script>
