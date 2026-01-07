@@ -137,3 +137,90 @@ body {
     .login-container { padding: 25px; width: 95%; }
     .logo-area h2 { font-size: 1.3em; }
 }
+
+/* --- TAMBAHAN KHUSUS DASHBOARD --- */
+
+/* Navbar Atas */
+.navbar {
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo { width: 40px; height: 40px; }
+.nav-title { font-weight: 700; font-size: 1.2em; color: var(--secondary); }
+
+.btn-logout-nav {
+    background: #ffebee; color: var(--danger);
+    border: 1px solid #ffcdd2; padding: 8px 15px;
+    border-radius: 20px; cursor: pointer; font-weight: 600;
+    transition: 0.3s; display: flex; align-items: center; gap: 5px;
+}
+.btn-logout-nav:hover { background: var(--danger); color: white; }
+
+/* Container Dashboard */
+.dashboard-container {
+    max-width: 900px; margin: 30px auto;
+    background: transparent; box-shadow: none; padding: 0 20px;
+}
+
+/* Bagian Sapaan (Welcome) */
+.welcome-section { margin-bottom: 30px; }
+.date-display { color: #888; font-size: 0.9em; margin-bottom: 5px; }
+.welcome-section h1 { margin: 0; font-size: 2em; color: var(--primary); }
+.subtitle { margin: 5px 0 0; color: #555; }
+
+/* Grid Menu Responsive */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Otomatis geser kalau layar kecil */
+    gap: 20px;
+}
+
+/* Kartu Menu Cantik */
+.menu-card {
+    background: white; padding: 25px;
+    border-radius: 15px; text-decoration: none; color: inherit;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer; border: 1px solid transparent;
+}
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.card-icon {
+    width: 60px; height: 60px; border-radius: 12px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.8em; color: white; flex-shrink: 0;
+}
+
+.card-text h3 { margin: 0 0 5px; font-size: 1.1em; color: var(--text-dark); text-align: left; }
+.card-text p { margin: 0; font-size: 0.85em; color: #777; text-align: left; }
+.card-arrow { margin-left: auto; color: #ccc; }
+
+/* Warna-warni Kartu */
+.card-blue .card-icon { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+.card-blue:hover { border-color: #4facfe; }
+
+.card-purple .card-icon { background: linear-gradient(45deg, #667eea, #764ba2); }
+.card-purple:hover { border-color: #764ba2; }
+
+.card-orange .card-icon { background: linear-gradient(45deg, #f7a04a, #ffc107); }
+.card-orange:hover { border-color: #f7a04a; }
+
+/* Responsif HP */
+@media (max-width: 480px) {
+    .nav-title { font-size: 1em; }
+    .logout-text { display: none; } /* Sembunyikan tulisan 'Keluar' di HP biar muat */
+    .btn-logout-nav { padding: 8px; border-radius: 50%; width: 35px; height: 35px; justify-content: center; }
+    
+    .welcome-section h1 { font-size: 1.5em; }
+    .menu-card { flex-direction: column; text-align: center; padding: 20px; }
+    .card-text h3, .card-text p { text-align: center; }
+    .card-arrow { display: none; }
+}
