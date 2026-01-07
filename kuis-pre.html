@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Kuis - Cendekia Aksara</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <a href="kuis-daftar.html" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 20px; display: inline-block; text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i> Batal / Kembali
+        </a>
+
+        <div class="header">
+            <h2>Konfirmasi Data</h2>
+            <p>Harap periksa detail sebelum memulai.</p>
+        </div>
+
+        <div class="item-card">
+            <h3 id="detail-title" style="text-align: left; margin-bottom: 10px; color: var(--primary-color);">Memuat judul...</h3>
+            <table style="width: 100%; font-size: 0.9em; color: var(--dark-text);">
+                <tr>
+                    <td style="padding: 5px 0; width: 120px; font-weight: bold;">Mata Pelajaran</td>
+                    <td id="detail-subject">: ...</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; font-weight: bold;">Jumlah Soal</td>
+                    <td id="detail-count">: ...</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; font-weight: bold;">Durasi Waktu</td>
+                    <td id="detail-duration">: ...</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; font-weight: bold;">Pengajar</td>
+                    <td id="detail-teacher">: ...</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="item-card" style="background-color: #fff8e1; border-color: #ffe082;">
+            <h4 style="margin-top: 0; color: #f57f17;"><i class="fa-solid fa-triangle-exclamation"></i> Petunjuk Pengerjaan</h4>
+            <ul style="text-align: left; padding-left: 20px; line-height: 1.6; font-size: 0.9em;">
+                <li>Waktu akan otomatis berjalan mundur saat Anda menekan tombol <b>MULAI</b>.</li>
+                <li>Pastikan koneksi internet Anda stabil.</li>
+                <li>Dilarang me-refresh halaman browser selama ujian berlangsung.</li>
+                <li>Jika waktu habis, jawaban akan tersimpan otomatis apa adanya.</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; text-align: right;">
+            <button id="btn-start" class="btn btn-success" style="width: auto; padding: 12px 30px; font-size: 1.1em;">
+                MULAI MENGERJAKAN <i class="fa-solid fa-rocket"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="progress-spinner"></div>
+        <p>Menyiapkan Soal...</p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/kuis-pre.js"></script>
+
+</body>
+</html>
