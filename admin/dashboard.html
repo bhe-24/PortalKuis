@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Cendekia Aksara</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="welcome-admin" style="text-align:left; margin:0;">Panel Admin</h2>
+            <button id="btn-logout" class="btn btn-danger btn-sm" style="width: auto;">Logout</button>
+        </div>
+
+        <hr>
+
+        <div class="dashboard-grid">
+            
+            <a href="quiz-manage.html" style="text-decoration: none;">
+                <div class="dashboard-card review">
+                    <i class="fa-solid fa-file-pen"></i>
+                    <h3>Kelola Kuis</h3>
+                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Buat soal & Edit kuis</p>
+                </div>
+            </a>
+
+            <a href="#" onclick="alert('Fitur Rekap Nilai akan kita buat di tahap akhir!')" style="text-decoration: none;">
+                <div class="dashboard-card" style="background-image: linear-gradient(45deg, #6f42c1, #e83e8c);">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <h3>Rekap Nilai</h3>
+                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Lihat hasil siswa</p>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-dashboard.js"></script>
+
+</body>
+</html>
