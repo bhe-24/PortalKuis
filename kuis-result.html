@@ -14,17 +14,18 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        body { background-color: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { background-color: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; font-family: 'Poppins', sans-serif; }
 
         .result-container {
             width: 100%; max-width: 500px;
             text-align: center;
         }
 
-        /* --- KARTU HASIL (YANG AKAN DI-SCREENSHOT) --- */
+        /* --- KARTU HASIL --- */
         .result-card {
             background: white;
             border-radius: 20px;
@@ -38,7 +39,7 @@
         /* Hiasan Header */
         .card-header-bg {
             height: 120px;
-            background: linear-gradient(135deg, var(--primary), #4facfe);
+            background: linear-gradient(135deg, #005a9c, #4facfe); /* Biru Cendekia */
             position: relative;
         }
         .card-header-bg::after {
@@ -57,7 +58,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             border: 5px solid #f8f9fa;
         }
-        .score-val { font-size: 3.5em; font-weight: 700; color: var(--primary); line-height: 1; }
+        .score-val { font-size: 3.5em; font-weight: 700; color: #005a9c; line-height: 1; }
         .score-label { font-size: 0.8em; color: #777; text-transform: uppercase; letter-spacing: 1px; }
 
         /* Detail Teks */
@@ -157,9 +158,8 @@
 
     <script src="js/config.js"></script>
     <script>
-        // Ambil Parameter dari URL (Hasil Redirect dari Kuis Main)
+        // Ambil Parameter dari URL
         const urlParams = new URLSearchParams(window.location.search);
-        const paramScore = urlParams.get('score');
         const paramQid = urlParams.get('qid'); // ID Kuis
 
         // Data Global untuk PDF
@@ -175,24 +175,33 @@
                 return;
             }
 
-            showLoading();
+            // Panggil Loading
+            if(typeof showLoading === 'function') showLoading();
 
             try {
-                // 1. AMBIL DATA SUBMISSION TERAKHIR DARI FIREBASE (Biar Aman & Data Lengkap)
-                // Kita tidak mengandalkan URL params saja, tapi ambil real data dari DB
+                // === PERBAIKAN: HAPUS .orderBy() AGAR TIDAK BUTUH INDEX FIREBASE ===
                 const subQuery = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .where('quizId', '==', paramQid)
-                    .orderBy('submittedAt', 'desc')
-                    .limit(1)
                     .get();
 
                 if (subQuery.empty) {
                     throw new Error("Data ujian tidak ditemukan di database.");
                 }
 
-                const subDoc = subQuery.docs[0];
-                globalSubmissionData = subDoc.data();
+                // Kita Urutkan Manual di Sini (Ambil yang paling baru)
+                let submissions = [];
+                subQuery.forEach(doc => submissions.push(doc.data()));
+                
+                // Sort Descending (Terbaru di atas) berdasarkan submittedAt
+                submissions.sort((a, b) => {
+                    const dateA = a.submittedAt ? a.submittedAt.seconds : 0;
+                    const dateB = b.submittedAt ? b.submittedAt.seconds : 0;
+                    return dateB - dateA;
+                });
+
+                // Ambil yang pertama (terbaru)
+                globalSubmissionData = submissions[0];
 
                 // 2. AMBIL DATA SOAL KUIS (Untuk PDF)
                 const quizDoc = await db.collection('quizzes').doc(paramQid).get();
@@ -203,10 +212,10 @@
                 renderResultCard(globalSubmissionData, user.displayName);
 
             } catch (err) {
-                console.error(err);
-                alert("Terjadi kesalahan: " + err.message);
+                console.error("Error Detail:", err);
+                alert("Gagal memuat: " + err.message);
             } finally {
-                hideLoading();
+                if(typeof hideLoading === 'function') hideLoading();
             }
         });
 
@@ -236,34 +245,31 @@
             }
         }
 
-        // --- FITUR 1: DOWNLOAD GAMBAR (HTML2CANVAS) ---
+        // --- FITUR DOWNLOAD GAMBAR ---
         function downloadImage() {
             const card = document.getElementById('result-card');
-            
-            // Efek Loading Tombol
-            showLoading();
+            if(typeof showLoading === 'function') showLoading();
 
             html2canvas(card, { scale: 2 }).then(canvas => {
-                // Buat link download
                 const link = document.createElement('a');
                 link.download = `Hasil_${globalSubmissionData.quizTitle}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
-                hideLoading();
+                if(typeof hideLoading === 'function') hideLoading();
             }).catch(err => {
-                hideLoading();
+                if(typeof hideLoading === 'function') hideLoading();
                 alert("Gagal membuat gambar.");
             });
         }
 
-        // --- FITUR 2: DOWNLOAD PDF (JSPDF - FIX ERROR) ---
+        // --- FITUR DOWNLOAD PDF ---
         async function downloadPDF() {
             if (!globalQuizData || !globalSubmissionData) {
                 alert("Data belum siap. Tunggu sebentar...");
                 return;
             }
 
-            showLoading();
+            if(typeof showLoading === 'function') showLoading();
 
             try {
                 const { jsPDF } = window.jspdf;
@@ -272,7 +278,7 @@
                 const pageWidth = doc.internal.pageSize.getWidth();
                 let y = 20;
 
-                // --- HEADER PDF ---
+                // HEADER
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(16);
                 doc.setTextColor(0, 90, 156);
@@ -293,44 +299,36 @@
                 doc.line(margin, y, pageWidth - margin, y);
                 y += 10;
 
-                // --- LOOP SOAL ---
-                // Kita harus mapping pertanyaan dengan jawaban siswa
-                // Perhatian: Soal di submission (userAnswers) disimpan berdasarkan INDEX.
-                // Kita gunakan array 'questions' dari quizData.
-                
+                // CONTENT SOAL
                 const questions = globalQuizData.questions;
                 const userAns = globalSubmissionData.answers || {};
 
                 questions.forEach((q, index) => {
-                    const studentChoice = userAns[index]; // Index jawaban siswa
+                    const studentChoice = userAns[index];
                     const correctChoice = parseInt(q.correctAnswerIndex);
 
-                    // Cek Page Break
                     if (y > 270) { doc.addPage(); y = 20; }
 
-                    // Tulis Soal
                     doc.setFont('helvetica', 'bold');
                     doc.setFontSize(11);
-                    const qText = `${index + 1}. ${q.questionText.replace(/<[^>]*>?/gm, '')}`; // Strip HTML tags simple
+                    const qText = `${index + 1}. ${q.questionText.replace(/<[^>]*>?/gm, '')}`;
                     const splitTitle = doc.splitTextToSize(qText, pageWidth - (margin * 2));
                     doc.text(splitTitle, margin, y);
                     y += (splitTitle.length * 5) + 3;
 
-                    // Tulis Opsi
                     doc.setFont('helvetica', 'normal');
                     doc.setFontSize(10);
                     
                     q.options.forEach((opt, i) => {
                         let prefix = (i === studentChoice) ? "(x) " : "( ) ";
-                        let color = [0, 0, 0]; // Hitam Default
+                        let color = [0, 0, 0];
 
-                        // Logika Warna PDF
                         if (i === correctChoice) {
-                            color = [0, 150, 0]; // Hijau (Kunci)
+                            color = [0, 150, 0]; 
                             prefix = "(KUNCI) ";
                         } 
                         if (i === studentChoice && i !== correctChoice) {
-                            color = [200, 0, 0]; // Merah (Salah Jawab)
+                            color = [200, 0, 0];
                             prefix = "(JAWABANMU) ";
                         }
 
@@ -343,14 +341,8 @@
                     });
                     
                     doc.setTextColor(0,0,0);
-                    y += 5; // Spasi antar soal
+                    y += 5;
                 });
-
-                // --- FOOTER ---
-                const footerText = "Digenerate oleh Cendekia Aksara System";
-                doc.setFontSize(9);
-                doc.setTextColor(150);
-                doc.text(footerText, pageWidth/2, 290, {align:'center'});
 
                 doc.save(`Arsip_${globalQuizData.title}.pdf`);
 
@@ -358,7 +350,7 @@
                 console.error(err);
                 alert("Gagal membuat PDF: " + err.message);
             } finally {
-                hideLoading();
+                if(typeof hideLoading === 'function') hideLoading();
             }
         }
     </script>
