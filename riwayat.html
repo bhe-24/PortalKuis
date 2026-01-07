@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Nilai - Cendekia Aksara</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* CSS Khusus Tabel Riwayat */
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-soft); }
+        .history-table th { background: var(--primary); color: white; padding: 15px; text-align: left; }
+        .history-table td { padding: 15px; border-bottom: 1px solid #eee; color: var(--text-main); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .score-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; color: white; font-weight: 600; font-size: 0.9em; }
+        .score-good { background: var(--success); }
+        .score-bad { background: var(--danger); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-name">Cendekia Aksara</span>
+            </div>
+            <a href="dashboard.html" class="btn-logout" style="color: var(--text-main); border-color: #ddd;">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+    </nav>
+
+    <div class="container dashboard-content">
+        <div class="welcome-banner" style="padding: 30px;">
+            <div class="welcome-text">
+                <h1>Riwayat Belajar</h1>
+                <p class="subtitle">Rekap hasil ujian yang telah Anda kerjakan.</p>
+            </div>
+            <div class="welcome-icon"><i class="fa-solid fa-file-invoice"></i></div>
+        </div>
+
+        <div id="history-container">
+            <p style="text-align:center;">Memuat data...</p>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        // JS Khusus Riwayat (Internal saja biar cepat)
+        auth.onAuthStateChanged(async user => {
+            if(!user) window.location.href = 'index.html';
+            
+            const container = document.getElementById('history-container');
+            const snap = await db.collection('quiz_submissions')
+                .where('studentUid', '==', user.uid)
+                .orderBy('submittedAt', 'desc')
+                .get();
+
+            if (snap.empty) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; background:white; border-radius:15px;"><i class="fa-solid fa-box-open" style="font-size:3em; color:#ddd;"></i><p>Belum ada riwayat ujian.</p></div>';
+                return;
+            }
+
+            let html = '<table class="history-table"><thead><tr><th>Judul Kuis</th><th>Tanggal</th><th>Nilai</th><th>Status</th></tr></thead><tbody>';
+            
+            snap.forEach(doc => {
+                const data = doc.data();
+                const date = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('id-ID') : '-';
+                const badgeClass = data.score >= 70 ? 'score-good' : 'score-bad';
+                const status = data.score >= 70 ? 'Lulus' : 'Remedial';
+                
+                html += `<tr>
+                    <td><strong>${data.quizTitle}</strong></td>
+                    <td>${date}</td>
+                    <td><span class="score-badge ${badgeClass}">${data.score}</span></td>
+                    <td>${status}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        });
+    </script>
+</body>
+</html>
