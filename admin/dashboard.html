@@ -13,10 +13,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
-        /* CSS Tambahan Khusus Admin agar beda warna */
+        /* CSS KHUSUS ADMIN */
         .admin-banner {
-            background: linear-gradient(135deg, #2c3e50, #4ca1af); /* Warna Elegan */
+            background: linear-gradient(135deg, #2c3e50, #4ca1af); /* Biru Gelap Elegan */
         }
+        
+        /* INI YANG KITA UBAH: WARNA TEKS LEBIH CERAH */
+        .subtitle-admin {
+            color: #ffe082 !important; /* Kuning Emas Terang */
+            font-weight: 500;
+            opacity: 1 !important;
+            margin-top: 5px;
+        }
+
+        /* Warna Kartu Menu Admin */
         .card-admin-quiz .icon-box { background: linear-gradient(135deg, #FF512F, #DD2476); }
         .card-admin-quiz:hover { border-bottom-color: #FF512F; }
 
@@ -46,8 +56,8 @@
         <div class="welcome-banner admin-banner">
             <div class="welcome-text">
                 <p class="date-text" id="date-display">Memuat tanggal...</p>
-                <h1 id="admin-name">Selamat Datang, Admin!</h1>
-                <p class="subtitle">Pusat kendali operasional sekolah.</p>
+                <h1 id="admin-name">Halo, Admin...</h1>
+                <p class="subtitle-admin">Pusat kendali operasional sekolah.</p>
             </div>
             <div class="welcome-icon">
                 <i class="fa-solid fa-user-shield"></i>
@@ -85,11 +95,6 @@
         </div>
 
     </main>
-
-    <div id="loading-overlay" class="hidden">
-        <div class="spinner"></div>
-        <p>Memproses...</p>
-    </div>
 
     <script src="../js/config.js"></script>
     <script src="../js/admin-dashboard.js"></script>
