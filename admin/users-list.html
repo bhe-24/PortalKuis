@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Siswa - Admin Cendekia</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="bg-gray">
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <span class="brand-name">Cendekia Aksara</span>
+            </div>
+            <a href="dashboard.html" class="btn-logout" style="color:#333; border-color:#ddd;">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+    </nav>
+
+    <div class="container dashboard-content">
+        <div class="welcome-banner" style="background: linear-gradient(135deg, #11998e, #38ef7d); padding: 30px;">
+            <div class="welcome-text">
+                <h1 style="margin:0;">Data Siswa</h1>
+                <p style="color:#e0f2f1; margin-top:5px;">Kelola data dan pantau arsip nilai siswa.</p>
+            </div>
+            <div class="welcome-icon"><i class="fa-solid fa-users"></i></div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="Cari nama siswa...">
+        </div>
+
+        <div id="users-grid" class="users-grid">
+            <div style="grid-column:1/-1; text-align:center; padding:50px;">
+                <div class="spinner" style="margin:0 auto 10px auto;"></div>
+                <p>Mengambil data siswa...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-users.js"></script>
+</body>
+</html>
