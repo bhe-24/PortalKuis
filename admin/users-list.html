@@ -7,8 +7,121 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <link rel="stylesheet" href="../css/style.css">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        /* Container Grid */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* === DESAIN KARTU PELAJAR (ID CARD) === */
+        .id-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            transition: transform 0.3s;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .id-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border-color: #11998e;
+        }
+
+        /* Lubang Gantungan (Hiasan Visual) */
+        .card-hole {
+            width: 40px; height: 8px;
+            background: #f0f0f0;
+            margin: 10px auto 0 auto;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Header Warna (Pola Geometris) */
+        .card-header-bg {
+            height: 80px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            margin-top: 10px; /* Jarak dari lubang gantungan */
+            position: relative;
+        }
+        
+        /* Foto Profil (Bulat menimpa header) */
+        .card-photo {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid white;
+            margin: -45px auto 10px auto; /* Tarik ke atas */
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .card-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Isi Kartu */
+        .card-body {
+            padding: 0 20px 20px 20px;
+            flex: 1; /* Agar tombol selalu di bawah */
+        }
+
+        .student-name {
+            font-size: 1.1em; font-weight: 700; color: #333;
+            margin: 5px 0 2px 0;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .student-id {
+            display: inline-block;
+            background: #e0f2f1; color: #00695c;
+            font-size: 0.75em; font-weight: 700;
+            padding: 3px 10px; border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #b2dfdb;
+        }
+
+        /* Garis Putus-putus */
+        .divider { border-top: 1px dashed #ddd; margin: 10px 0; }
+
+        .meta-info {
+            font-size: 0.85em; color: #666;
+            display: flex; justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .meta-label { font-weight: 600; color: #999; }
+
+        /* Tombol Bawah (Full Width) */
+        .btn-card-action {
+            background: #333; color: white;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 0.9em; font-weight: 600;
+            transition: 0.3s;
+            border-top: 1px solid #eee;
+        }
+        .btn-card-action:hover {
+            background: #11998e;
+        }
+
+        /* Search Bar (Tetap Rapi) */
+        .search-container { max-width: 500px; margin: 0 auto 30px auto; position: relative; }
+        .search-wrapper { background: white; padding: 5px 20px; border-radius: 50px; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .search-wrapper:focus-within { border-color: #11998e; }
+        .search-input { border: none; outline: none; width: 100%; padding: 10px 0; font-size: 1em; }
+    </style>
 </head>
 <body class="bg-gray">
 
@@ -25,22 +138,23 @@
     </nav>
 
     <div class="container dashboard-content">
-        <div class="welcome-banner" style="background: linear-gradient(135deg, #11998e, #38ef7d); padding: 30px;">
-            <div class="welcome-text">
-                <h1 style="margin:0;">Data Siswa</h1>
-                <p style="color:#e0f2f1; margin-top:5px;">Kelola data dan pantau arsip nilai siswa.</p>
-            </div>
-            <div class="welcome-icon"><i class="fa-solid fa-users"></i></div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2c3e50; margin-bottom: 5px;">Data Siswa</h1>
+            <p style="color: #7f8c8d;">Arsip dan Database Kartu Pelajar</p>
         </div>
 
-        <div class="search-box">
-            <input type="text" id="search-input" class="search-input" placeholder="Cari nama siswa...">
+        <div class="search-container">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass" style="color:#aaa; margin-right:15px;"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Cari Nama atau ID Siswa...">
+            </div>
         </div>
 
         <div id="users-grid" class="users-grid">
             <div style="grid-column:1/-1; text-align:center; padding:50px;">
                 <div class="spinner" style="margin:0 auto 10px auto;"></div>
-                <p>Mengambil data siswa...</p>
+                <p>Mencetak kartu...</p>
             </div>
         </div>
     </div>
