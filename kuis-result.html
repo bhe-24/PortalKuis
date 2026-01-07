@@ -75,7 +75,6 @@
             overflow: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.15);
             border: 1px solid #ddd;
-            /* Layout Flex untuk isi */
             display: flex; flex-direction: column; align-items: center;
         }
 
@@ -86,18 +85,18 @@
             z-index: 1; pointer-events: none;
         }
         
-        /* Hiasan Sudut (Biru) */
+        /* Hiasan Sudut */
         .corner-deco-tl {
             position: absolute; top: 0; left: 0;
             width: 150px; height: 150px;
-            background: #1e3a5f; /* Biru Gelap */
+            background: #1e3a5f;
             border-bottom-right-radius: 100%;
             z-index: 0;
         }
         .corner-deco-br {
             position: absolute; bottom: 0; right: 0;
             width: 120px; height: 120px;
-            background: #d4af37; /* Emas */
+            background: #d4af37;
             border-top-left-radius: 100%;
             opacity: 0.3;
             z-index: 0;
@@ -116,7 +115,7 @@
             margin-top: 60px;
         }
         .cert-title {
-            font-family: 'Cinzel', serif; /* Font Tegas */
+            font-family: 'Cinzel', serif;
             font-size: 3.5em; color: #1e3a5f; letter-spacing: 5px;
             margin: 0; font-weight: 700; text-transform: uppercase;
         }
@@ -132,6 +131,7 @@
             margin: 10px 0 20px 0;
             text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
             line-height: 1.2;
+            min-height: 80px; /* Jaga tinggi agar tidak gepeng */
         }
 
         .cert-body {
@@ -151,36 +151,26 @@
         
         /* Cap Basah */
         .stamp-img {
-            position: absolute; top: -30px; left: 50%; 
+            position: absolute; top: -40px; left: 50%; 
             transform: translateX(-50%) rotate(-10deg);
-            width: 110px; opacity: 0.85; pointer-events: none;
-            mix-blend-mode: multiply; /* Efek menyatu dengan kertas */
+            width: 120px; opacity: 0.9;
+            z-index: 5; /* Z-index tinggi agar muncul di atas */
         }
 
         /* LOGO DI SERTIFIKAT */
         .cert-logo {
             position: absolute; top: 40px; right: 40px; width: 60px; opacity: 0.8;
+            z-index: 5;
         }
 
-
-        /* --- RESPONSIF MOBILE (SEMBUNYIKAN PREVIEW) --- */
         @media (max-width: 900px) {
             .main-layout { flex-direction: column; align-items: center; }
             .result-column { width: 100%; max-width: 100%; }
-            
-            /* Sembunyikan Preview Sertifikat di HP */
             .cert-column { display: none; } 
-            
-            /* Tapi elemennya tetap harus ada (hidden) untuk digenerate script */
-            #certificate-hidden-wrapper { 
-                position: absolute; left: -9999px; top: -9999px; 
-            }
+            #certificate-hidden-wrapper { position: absolute; left: -9999px; top: -9999px; }
         }
         
-        /* Trik agar elemen hidden tetap bisa dirender html2canvas */
-        .visible-on-mobile-render {
-            display: flex !important;
-        }
+        .visible-on-mobile-render { display: flex !important; }
 
     </style>
 </head>
@@ -229,7 +219,7 @@
                 <div class="corner-line-tr"></div>
                 <div class="cert-border-outer"></div>
                 
-                <img src="https://imgur.com/5Srjyo4.png" class="cert-logo" alt="Logo">
+                <img src="https://imgur.com/5Srjyo4.png" class="cert-logo" alt="Logo" crossorigin="anonymous">
 
                 <div class="cert-content">
                     <h1 class="cert-title">SERTIFIKAT</h1>
@@ -252,7 +242,7 @@
                     </div>
 
                     <div class="sign-box">
-                        <img src="https://imgur.com/YvrNYRw" class="stamp-img" alt="Stamp">
+                        <img src="https://imgur.com/YvrNYRw.png" class="stamp-img" alt="Stamp" crossorigin="anonymous">
                         
                         <div class="sign-line">Cendekia Aksara</div>
                         <div class="sign-role">Panitia Ujian</div>
@@ -280,7 +270,15 @@
             if(typeof showLoading === 'function') showLoading();
 
             try {
-                // 1. Ambil Data Nilai (No Index)
+                // 1. AMBIL NAMA ASLI DARI DATABASE USER (Fix Nama Tidak Muncul)
+                // Kita tidak percaya pada user.displayName, kita ambil dari koleksi 'users'
+                let realStudentName = user.displayName;
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if(userDoc.exists && userDoc.data().name) {
+                    realStudentName = userDoc.data().name;
+                }
+
+                // 2. Ambil Data Nilai
                 const subQuery = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .where('quizId', '==', paramQid)
@@ -288,19 +286,20 @@
 
                 if (subQuery.empty) throw new Error("Data ujian tidak ditemukan.");
 
+                // Sorting Manual
                 let submissions = [];
                 subQuery.forEach(doc => submissions.push(doc.data()));
                 submissions.sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
                 
                 globalSubmissionData = submissions[0];
 
-                // 2. Ambil Data Kuis
+                // 3. Ambil Data Kuis
                 const quizDoc = await db.collection('quizzes').doc(paramQid).get();
                 if (!quizDoc.exists) throw new Error("Data soal kuis hilang.");
                 globalQuizData = quizDoc.data();
 
-                // 3. Render
-                updateUI(globalSubmissionData, user.displayName);
+                // 4. Render dengan Nama yang Benar
+                updateUI(globalSubmissionData, realStudentName);
 
             } catch (err) {
                 console.error(err);
@@ -311,9 +310,9 @@
         });
 
         function updateUI(data, userName) {
+            // Prioritaskan Nama dari Database User -> Nama di Submission -> Default
             const finalName = userName || data.studentName || "Siswa Cendekia";
             
-            // --- Update Kartu Kiri ---
             document.getElementById('display-score').textContent = data.score;
             document.getElementById('res-quiz-title').textContent = data.quizTitle;
             document.getElementById('res-student-name').textContent = finalName;
@@ -329,12 +328,11 @@
                 badge.className = "status-badge status-remed"; badge.textContent = "REMEDIAL"; predikat = "CUKUP";
             }
 
-            // --- Update Sertifikat (Kanan) ---
+            // Update Sertifikat
             document.getElementById('cert-student-name').textContent = finalName;
             document.getElementById('cert-quiz-name').textContent = data.quizTitle;
             document.getElementById('cert-grade').textContent = predikat;
             
-            // Tanggal Indonesia
             const dateObj = data.submittedAt ? data.submittedAt.toDate() : new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('cert-date').textContent = "Yogyakarta, " + dateObj.toLocaleDateString('id-ID', options);
@@ -346,38 +344,25 @@
             const mobileWrapper = document.getElementById('mobile-render-helper');
             const previewContainer = document.getElementById('cert-preview-container');
             
-            // Cek apakah kita di Mobile? (Preview container hidden)
             const isMobile = window.getComputedStyle(previewContainer).display === 'none';
-
-            // Jika Mobile, kita pindahkan node sertifikat ke area tersembunyi tapi ter-render
-            if (isMobile) {
-                mobileWrapper.appendChild(certNode);
-            }
+            if (isMobile) mobileWrapper.appendChild(certNode);
 
             if(typeof showLoading === 'function') showLoading();
 
-            // Render dengan kualitas tinggi (scale 2)
+            // PENTING: useCORS: true agar gambar dari imgur bisa di-render
             html2canvas(certNode, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Sertifikat_${globalSubmissionData.quizTitle}.jpg`;
                 link.href = canvas.toDataURL("image/jpeg", 0.9);
                 link.click();
                 
-                // Balikin Node ke tempat semula jika mobile
-                if (isMobile) {
-                    previewContainer.appendChild(certNode);
-                }
-                
+                if (isMobile) previewContainer.appendChild(certNode);
                 if(typeof hideLoading === 'function') hideLoading();
             }).catch(err => {
                 console.error(err);
                 if(typeof hideLoading === 'function') hideLoading();
-                alert("Gagal mencetak sertifikat. Coba gunakan Laptop.");
-                
-                // Balikin Node error
-                if (isMobile) {
-                    previewContainer.appendChild(certNode);
-                }
+                alert("Gagal mencetak. Pastikan koneksi lancar.");
+                if (isMobile) previewContainer.appendChild(certNode);
             });
         }
 
