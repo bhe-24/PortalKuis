@@ -3,154 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Kuis - Cendekia Aksara</title>
+    <title>Masuk - Cendekia Aksara</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <link rel="stylesheet" href="style.css">
-    
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+
+    <div class="container" style="max-width: 450px; margin-top: 50px;">
         <div class="header">
-            <h1 id="main-header"><i class="fa-solid fa-list-check"></i> Cendekia Aksara</h1>
-            <p id="sub-header">Portal Kuis Terpadu</p>
+            <h1><i class="fa-solid fa-school"></i> Cendekia Aksara</h1>
+            <p>Portal Kuis & Ujian Online</p>
         </div>
 
-        <div id="auth-view" class="view">
-             <div id="login-form-container">
-                <h2>Masuk ke Portal Kuis</h2>
-                <form id="login-form">
-                    <div class="form-group"><label for="username">Email</label><input type="email" id="username" required></div>
-                    <div class="form-group"><label for="password">Password</label><input type="password" id="password" required></div>
-                    <button type="submit" class="btn">Login</button>
-                </form>
-                <p class="toggle-auth" id="show-register-link">Belum punya akun? Daftar di sini.</p>
-             </div>
-             <div id="register-form-container" class="hidden">
-                <h2>Daftar Akun Baru</h2>
-                <form id="register-form">
-                    <div class="form-group"><label for="register-name">Nama Lengkap</label><input type="text" id="register-name" required></div>
-                    <div class="form-group"><label for="register-email">Email</label><input type="email" id="register-email" required></div>
-                    <div class="form-group"><label for="register-password">Password</label><input type="password" id="register-password" required minlength="6"></div>
-                    <button type="submit" class="btn">Daftar</button>
-                </form>
-                <p class="toggle-auth" id="show-login-link">Sudah punya akun? Masuk di sini.</p>
-             </div>
-        </div>
-        
-        <div id="dashboard-view" class="view hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                 <h2 id="welcome-user" style="text-align:left; margin:0;"></h2>
-                 <button id="logout-btn" class="btn btn-danger btn-icon" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
-            </div>
-            <div id="main-dashboard-grid" class="dashboard-grid">
-                <div class="dashboard-card kuis" id="kuis-menu"> <i class="fa-solid fa-list-check"></i> <h3>Kuis</h3> </div>
-            </div>
-        </div>
-
-        <div id="kuis-view" class="view hidden">
-            <button class="btn btn-secondary back-to-dashboard" style="width:auto; margin-bottom:20px;"><i class="fa-solid fa-arrow-left"></i> Kembali</button>
-            <h2>Daftar Kuis</h2>
-            <div id="kuis-list-siswa"></div>
-        </div>
-        
-        <div id="ujian-pre-view" class="view hidden">
-             </div>
-        
-        <div id="ujian-session-view" class="view hidden">
-             </div>
-        
-        <div id="ujian-review-view" class="view hidden">
-            </div>
-        
-        <div id="admin-dashboard-view" class="view hidden">
-            <h2 id="welcome-admin" style="text-align:left; margin:0 0 20px 0;"></h2>
-            <div class="dashboard-grid">
-                <div class="dashboard-card review" id="admin-kuis-menu"> <i class="fa-solid fa-file-signature"></i> <h3>Kelola Kuis</h3> </div>
-            </div>
-             <div style="text-align: center; margin-top: 30px;">
-                <button id="admin-logout-btn" class="btn btn-danger" style="width:auto;">Logout</button>
-            </div>
-        </div>
-
-        <div id="admin-kuis-view" class="view hidden">
-            <button class="btn btn-secondary back-to-admin-dashboard" style="width:auto; margin-bottom:20px;"><i class="fa-solid fa-arrow-left"></i> Kembali</button>
-            <h2 id="kuis-form-title">Kelola Kuis</h2>
-            <div id="kuis-list-admin"></div> <hr style="margin: 30px 0;">
-            <h3><i class="fa-solid fa-plus-circle"></i> Buat/Edit Kuis</h3>
-            <form id="kuis-form">
-                <input type="hidden" id="edit-ku-id">
-                <div class="form-group"><label for="ku-title">Judul Kuis</label><input type="text" id="ku-title" required></div>
-                <div class="form-group"><label for="ku-subject">Mata Pelajaran</label><input type="text" id="ku-subject" required></div>
-                <div class="form-group"><label for="ku-duration">Durasi (menit)</label><input type="number" id="ku-duration" required></div>
-                
-                <div class="tab-switcher" style="display: flex; gap: 5px; margin-top: 20px; border-bottom: 1px solid var(--light-gray);">
-                    <button type="button" id="tab-manual" class="btn tab-btn" style="width:auto; background-color: var(--primary-color);">Input Manual</button>
-                    <button type="button" id="tab-bulk" class="btn tab-btn" style="width:auto; background-color: var(--gray-color);">Input Massal</button>
+        <div id="login-box">
+            <h3>Silakan Masuk</h3>
+            <form id="form-login">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required placeholder="nama@email.com">
                 </div>
-
-                <div id="question-builder" class="question-tab-content">
-                    <h4>Buat Soal Pilihan Ganda</h4>
-                    <div class="form-group"><label>Teks Pertanyaan</label><textarea id="qb-question" rows="3"></textarea></div>
-                    <label>Pilihan Jawaban (Pilih satu sebagai kunci jawaban)</label>
-                    <div class="question-option"><input type="radio" name="correct-answer" value="0" checked> <input type="text" class="qb-option" placeholder="Pilihan A"></div>
-                    <div class="question-option"><input type="radio" name="correct-answer" value="1"> <input type="text" class="qb-option" placeholder="Pilihan B"></div>
-                    <div class="question-option"><input type="radio" name="correct-answer" value="2"> <input type="text" class="qb-option" placeholder="Pilihan C"></div>
-                    <div class="question-option"><input type="radio" name="correct-answer" value="3"> <input type="text" class="qb-option" placeholder="Pilihan D"></div>
-                    <button type="button" id="add-question-btn" class="btn btn-secondary" style="width:auto;">+ Tambah Soal</button>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="******">
                 </div>
-                
-                <div id="question-builder-bulk" class="question-tab-content hidden" style="border: 1px solid var(--light-gray); padding: 20px; border-radius: var(--border-radius); margin-top: 20px;">
-                    <h4>Input Soal Massal</h4>
-                    <div class="form-group">
-                        <label for="bulk-questions">Tempel Soal di Sini</label>
-                        <textarea id="bulk-questions" rows="15" style="font-family: monospace; font-size: 0.9em;" placeholder="FORMAT WAJIB (Pisahkan soal dengan baris kosong):
-
-1. Apa ibukota Indonesia?
-A. Bandung
-*B. Jakarta
-C. Surabaya
-D. Medan
-
-(Tandai jawaban benar dengan tanda bintang * di awal pilihan)"></textarea>
-                    </div>
-                    <button type="button" id="parse-bulk-btn" class="btn btn-secondary" style="width:auto;">Proses Soal</button>
-                    <p id="parse-result" style="margin-top:10px; font-style: italic;"></p>
-                </div>
-                
-                <div id="added-questions-list" style="margin-top: 20px;">
-                    <h4>Daftar Soal</h4>
-                    <p>Belum ada soal yang ditambahkan.</p>
-                </div>
-                <hr style="margin: 20px 0;">
-                <button type="submit" class="btn btn-success">Simpan Kuis</button>
-                 <button type="button" id="cancel-edit-ku-btn" class="btn btn-secondary hidden" style="margin-top:10px;">Batal Edit</button>
+                <button type="submit" class="btn">Masuk Sekarang</button>
             </form>
+            <p class="toggle-auth" onclick="toggleForm('register')">Belum punya akun? Daftar Siswa</p>
         </div>
-        
+
+        <div id="register-box" class="hidden">
+            <h3>Pendaftaran Siswa Baru</h3>
+            <form id="form-register">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="reg-name" required placeholder="Contoh: Budi Santoso">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-success">Daftar Akun</button>
+            </form>
+            <p class="toggle-auth" onclick="toggleForm('login')">Sudah punya akun? Login di sini</p>
+        </div>
     </div>
 
-    <div id="loading-overlay" class="hidden"><div class="progress-spinner"></div><p id="loading-text">Memuat...</p></div>
-    <div id="custom-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header"><h2 id="modal-title">Judul Modal</h2></div>
-            <div class="modal-body" id="modal-body-content"><p id="modal-text">Teks modal di sini.</p></div>
-            <div class="modal-footer">
-                <button id="modal-cancel-btn" class="btn btn-secondary">Batal</button>
-                <button id="modal-confirm-btn" class="btn">OK</button>
-            </div>
-        </div>
+    <div id="loading-overlay" class="hidden">
+        <div class="progress-spinner"></div>
+        <p>Memproses...</p>
     </div>
-    
-    <button id="help-bubble" class="help-bubble hidden"><i class="fa-solid fa-question"></i></button>
 
-    <script src="script.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+
 </body>
 </html>
