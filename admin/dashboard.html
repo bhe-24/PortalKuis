@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Cendekia Aksara</title>
+    <title>Admin Panel - Cendekia Aksara</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -11,36 +11,84 @@
 
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        /* CSS Tambahan Khusus Admin agar beda warna */
+        .admin-banner {
+            background: linear-gradient(135deg, #2c3e50, #4ca1af); /* Warna Elegan */
+        }
+        .card-admin-quiz .icon-box { background: linear-gradient(135deg, #FF512F, #DD2476); }
+        .card-admin-quiz:hover { border-bottom-color: #FF512F; }
+
+        .card-admin-users .icon-box { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .card-admin-users:hover { border-bottom-color: #11998e; }
+    </style>
 </head>
-<body>
+<body class="bg-gray">
 
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 id="welcome-admin" style="text-align:left; margin:0;">Panel Admin</h2>
-            <button id="btn-logout" class="btn btn-danger btn-sm" style="width: auto;">Logout</button>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <div class="nav-text">
+                    <span class="brand-name">Cendekia Aksara</span>
+                    <span class="brand-sub" style="color: #e74c3c;">Administrator</span>
+                </div>
+            </div>
+            <button id="btn-logout" class="btn-logout">
+                <i class="fa-solid fa-power-off"></i> <span class="hide-mobile">Keluar</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container dashboard-content">
+        
+        <div class="welcome-banner admin-banner">
+            <div class="welcome-text">
+                <p class="date-text" id="date-display">Memuat tanggal...</p>
+                <h1 id="admin-name">Selamat Datang, Admin!</h1>
+                <p class="subtitle">Pusat kendali operasional sekolah.</p>
+            </div>
+            <div class="welcome-icon">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
         </div>
 
-        <hr>
-
-        <div class="dashboard-grid">
+        <div class="menu-grid">
             
-            <a href="quiz-manage.html" style="text-decoration: none;">
-                <div class="dashboard-card review">
+            <a href="quiz-manage.html" class="menu-item card-admin-quiz">
+                <div class="icon-box">
                     <i class="fa-solid fa-file-pen"></i>
+                </div>
+                <div class="text-box">
                     <h3>Kelola Kuis</h3>
-                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Buat soal & Edit kuis</p>
+                    <p>Buat soal baru, edit, atau hapus kuis.</p>
+                </div>
+                <div class="arrow-box">
+                    <i class="fa-solid fa-chevron-right"></i>
                 </div>
             </a>
 
-            <a href="#" onclick="alert('Fitur Rekap Nilai akan kita buat di tahap akhir!')" style="text-decoration: none;">
-                <div class="dashboard-card" style="background-image: linear-gradient(45deg, #6f42c1, #e83e8c);">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <h3>Rekap Nilai</h3>
-                    <p style="color: white; font-size: 0.9em; margin-top: 5px;">Lihat hasil siswa</p>
+            <div class="menu-item card-admin-users" onclick="alert('Fitur Rekap Nilai Siswa akan segera hadir!')">
+                <div class="icon-box">
+                    <i class="fa-solid fa-users-viewfinder"></i>
                 </div>
-            </a>
+                <div class="text-box">
+                    <h3>Data Siswa & Nilai</h3>
+                    <p>Pantau perkembangan hasil belajar.</p>
+                </div>
+                <div class="arrow-box">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+            </div>
 
         </div>
+
+    </main>
+
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <p>Memproses...</p>
     </div>
 
     <script src="../js/config.js"></script>
