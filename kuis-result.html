@@ -21,13 +21,13 @@
     <style>
         body { background-color: #f0f2f5; min-height: 100vh; padding: 20px; font-family: 'Poppins', sans-serif; }
 
-        /* LAYOUT UTAMA: 2 KOLOM (Laptop) */
+        /* LAYOUT UTAMA */
         .main-layout {
             display: flex; gap: 30px; justify-content: center; align-items: flex-start;
             max-width: 1200px; margin: 0 auto;
         }
 
-        /* --- KOLOM KIRI: HASIL NILAI --- */
+        /* --- KOLOM KIRI: HASIL --- */
         .result-column { flex: 1; max-width: 400px; }
 
         .result-card {
@@ -60,107 +60,66 @@
         .btn-outline { background: white; border: 1px solid #ddd; color: #555; }
         .btn-full:hover { transform: translateY(-2px); opacity: 0.9; }
 
-
-        /* --- KOLOM KANAN: PREVIEW SERTIFIKAT (A5 LANDSCAPE) --- */
+        /* --- KOLOM KANAN: SERTIFIKAT --- */
         .cert-column { 
             flex: 2; display: flex; justify-content: center; align-items: center; 
             perspective: 1000px;
         }
 
-        /* Canvas Sertifikat (Ukuran Fix A5 Landscape: 210mm x 148mm -> approx 800px width) */
         #certificate-node {
-            width: 800px; height: 565px; /* Rasio A5 */
-            background: white;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-            border: 1px solid #ddd;
+            width: 800px; height: 565px; /* A5 Landscape Ratio */
+            background: white; position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15); border: 1px solid #ddd;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* DESAIN SERTIFIKAT (CSS ONLY) */
+        /* DESAIN SERTIFIKAT */
         .cert-border-outer {
             position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px;
-            border: 2px solid #d4af37; /* Emas */
-            z-index: 1; pointer-events: none;
+            border: 2px solid #d4af37; z-index: 1; pointer-events: none;
         }
-        
-        /* Hiasan Sudut */
         .corner-deco-tl {
-            position: absolute; top: 0; left: 0;
-            width: 150px; height: 150px;
-            background: #1e3a5f;
-            border-bottom-right-radius: 100%;
-            z-index: 0;
+            position: absolute; top: 0; left: 0; width: 150px; height: 150px;
+            background: #1e3a5f; border-bottom-right-radius: 100%; z-index: 0;
         }
         .corner-deco-br {
-            position: absolute; bottom: 0; right: 0;
-            width: 120px; height: 120px;
-            background: #d4af37;
-            border-top-left-radius: 100%;
-            opacity: 0.3;
-            z-index: 0;
+            position: absolute; bottom: 0; right: 0; width: 120px; height: 120px;
+            background: #d4af37; border-top-left-radius: 100%; opacity: 0.3; z-index: 0;
         }
         .corner-line-tr {
-            position: absolute; top: 20px; right: 20px;
-            width: 100px; height: 100px;
-            border-top: 5px solid #d4af37;
-            border-right: 5px solid #d4af37;
-            z-index: 1;
+            position: absolute; top: 20px; right: 20px; width: 100px; height: 100px;
+            border-top: 5px solid #d4af37; border-right: 5px solid #d4af37; z-index: 1;
         }
 
-        /* Konten Teks Sertifikat */
-        .cert-content {
-            z-index: 2; text-align: center; width: 80%;
-            margin-top: 60px;
-        }
-        .cert-title {
-            font-family: 'Cinzel', serif;
-            font-size: 3.5em; color: #1e3a5f; letter-spacing: 5px;
-            margin: 0; font-weight: 700; text-transform: uppercase;
-        }
-        .cert-subtitle {
-            font-family: 'Poppins', sans-serif; font-size: 1.2em;
-            color: #555; margin-top: 10px; letter-spacing: 2px;
-        }
+        /* Konten Sertifikat */
+        .cert-content { z-index: 2; text-align: center; width: 80%; margin-top: 60px; }
+        .cert-title { font-family: 'Cinzel', serif; font-size: 3.5em; color: #1e3a5f; letter-spacing: 5px; margin: 0; font-weight: 700; }
+        .cert-subtitle { font-family: 'Poppins', sans-serif; font-size: 1.2em; color: #555; margin-top: 10px; letter-spacing: 2px; }
 
-        /* NAMA SISWA (Latin/Cursive) */
         .cert-name {
-            font-family: 'Great Vibes', cursive;
-            font-size: 4.5em; color: #d4af37; /* Emas */
-            margin: 10px 0 20px 0;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
-            line-height: 1.2;
-            min-height: 80px; /* Jaga tinggi agar tidak gepeng */
+            font-family: 'Great Vibes', cursive; font-size: 4.5em; color: #d4af37;
+            margin: 10px 0 20px 0; text-shadow: 1px 1px 0px rgba(0,0,0,0.1); line-height: 1.2;
+            min-height: 80px;
         }
 
-        .cert-body {
-            font-family: 'Poppins', sans-serif; font-size: 0.9em; color: #666;
-            line-height: 1.6; max-width: 600px; margin: 0 auto;
-        }
+        .cert-body { font-family: 'Poppins', sans-serif; font-size: 0.9em; color: #666; line-height: 1.6; max-width: 600px; margin: 0 auto; }
 
-        /* Footer Tanda Tangan */
+        /* Footer */
         .cert-footer {
             position: absolute; bottom: 40px; width: 80%;
-            display: flex; justify-content: space-between; align-items: flex-end;
-            z-index: 2;
+            display: flex; justify-content: space-between; align-items: flex-end; z-index: 2;
         }
         .sign-box { text-align: center; position: relative; width: 200px; }
         .sign-line { border-top: 1px solid #333; margin-top: 60px; padding-top: 5px; font-weight: 700; color: #1e3a5f; }
         .sign-role { font-size: 0.8em; color: #777; }
         
-        /* Cap Basah */
-        .stamp-img {
-            position: absolute; top: -40px; left: 50%; 
-            transform: translateX(-50%) rotate(-10deg);
-            width: 120px; opacity: 0.9;
-            z-index: 5; /* Z-index tinggi agar muncul di atas */
-        }
-
-        /* LOGO DI SERTIFIKAT */
+        /* LOGO & STAMP - Z-Index Tinggi */
         .cert-logo {
-            position: absolute; top: 40px; right: 40px; width: 60px; opacity: 0.8;
-            z-index: 5;
+            position: absolute; top: 40px; right: 40px; width: 60px; opacity: 0.8; z-index: 10;
+        }
+        .stamp-img {
+            position: absolute; top: -40px; left: 50%; transform: translateX(-50%) rotate(-10deg);
+            width: 120px; opacity: 0.9; z-index: 10;
         }
 
         @media (max-width: 900px) {
@@ -169,9 +128,6 @@
             .cert-column { display: none; } 
             #certificate-hidden-wrapper { position: absolute; left: -9999px; top: -9999px; }
         }
-        
-        .visible-on-mobile-render { display: flex !important; }
-
     </style>
 </head>
 <body>
@@ -200,11 +156,9 @@
                     <button onclick="downloadCertificate()" class="btn-full btn-gold">
                         <i class="fa-solid fa-certificate"></i> Unduh Sertifikat (JPG)
                     </button>
-                    
                     <button onclick="downloadPDF()" class="btn-full btn-blue">
                         <i class="fa-solid fa-file-pdf"></i> Unduh Arsip Soal (PDF)
                     </button>
-                    
                     <button onclick="window.location.href='dashboard.html'" class="btn-full btn-outline">
                         Kembali ke Dashboard
                     </button>
@@ -231,7 +185,7 @@
                     
                     <div class="cert-body">
                         Atas kelulusannya dalam menyelesaikan ujian kompetensi<br>
-                        <strong id="cert-quiz-name" style="color:#1e3a5f; font-size:1.1em;">Nama Kuis Disini</strong><br>
+                        <strong id="cert-quiz-name" style="color:#1e3a5f; font-size:1.1em;">Nama Kuis</strong><br>
                         dengan predikat <strong id="cert-grade" style="color:#d4af37;">SANGAT BAIK</strong>.
                     </div>
                 </div>
@@ -270,15 +224,14 @@
             if(typeof showLoading === 'function') showLoading();
 
             try {
-                // 1. AMBIL NAMA ASLI DARI DATABASE USER (Fix Nama Tidak Muncul)
-                // Kita tidak percaya pada user.displayName, kita ambil dari koleksi 'users'
+                // Ambil Nama Real
                 let realStudentName = user.displayName;
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if(userDoc.exists && userDoc.data().name) {
                     realStudentName = userDoc.data().name;
                 }
 
-                // 2. Ambil Data Nilai
+                // Ambil Nilai
                 const subQuery = await db.collection('quiz_submissions')
                     .where('studentUid', '==', user.uid)
                     .where('quizId', '==', paramQid)
@@ -286,19 +239,17 @@
 
                 if (subQuery.empty) throw new Error("Data ujian tidak ditemukan.");
 
-                // Sorting Manual
                 let submissions = [];
                 subQuery.forEach(doc => submissions.push(doc.data()));
                 submissions.sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0));
                 
                 globalSubmissionData = submissions[0];
 
-                // 3. Ambil Data Kuis
+                // Ambil Kuis
                 const quizDoc = await db.collection('quizzes').doc(paramQid).get();
                 if (!quizDoc.exists) throw new Error("Data soal kuis hilang.");
                 globalQuizData = quizDoc.data();
 
-                // 4. Render dengan Nama yang Benar
                 updateUI(globalSubmissionData, realStudentName);
 
             } catch (err) {
@@ -310,9 +261,9 @@
         });
 
         function updateUI(data, userName) {
-            // Prioritaskan Nama dari Database User -> Nama di Submission -> Default
             const finalName = userName || data.studentName || "Siswa Cendekia";
             
+            // Update Kartu Kiri
             document.getElementById('display-score').textContent = data.score;
             document.getElementById('res-quiz-title').textContent = data.quizTitle;
             document.getElementById('res-student-name').textContent = finalName;
@@ -338,35 +289,32 @@
             document.getElementById('cert-date').textContent = "Yogyakarta, " + dateObj.toLocaleDateString('id-ID', options);
         }
 
-        // --- DOWNLOAD SERTIFIKAT (JPG) ---
         function downloadCertificate() {
             const certNode = document.getElementById('certificate-node');
             const mobileWrapper = document.getElementById('mobile-render-helper');
             const previewContainer = document.getElementById('cert-preview-container');
-            
             const isMobile = window.getComputedStyle(previewContainer).display === 'none';
-            if (isMobile) mobileWrapper.appendChild(certNode);
 
+            if (isMobile) mobileWrapper.appendChild(certNode);
             if(typeof showLoading === 'function') showLoading();
 
-            // PENTING: useCORS: true agar gambar dari imgur bisa di-render
+            // PENTING: useCORS: true agar gambar dari luar bisa dirender
             html2canvas(certNode, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Sertifikat_${globalSubmissionData.quizTitle}.jpg`;
                 link.href = canvas.toDataURL("image/jpeg", 0.9);
                 link.click();
-                
                 if (isMobile) previewContainer.appendChild(certNode);
                 if(typeof hideLoading === 'function') hideLoading();
             }).catch(err => {
                 console.error(err);
                 if(typeof hideLoading === 'function') hideLoading();
-                alert("Gagal mencetak. Pastikan koneksi lancar.");
+                alert("Gagal mencetak. Gambar eksternal mungkin diblokir browser.");
                 if (isMobile) previewContainer.appendChild(certNode);
             });
         }
-
-        // --- DOWNLOAD PDF SOAL ---
+        
+        // (Fungsi downloadPDF sama seperti sebelumnya)
         async function downloadPDF() {
             if (!globalQuizData || !globalSubmissionData) return alert("Data belum siap.");
             if(typeof showLoading === 'function') showLoading();
@@ -377,11 +325,8 @@
                 const margin = 15;
                 let y = 20; const pageWidth = doc.internal.pageSize.getWidth();
 
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(16);
-                doc.setTextColor(0, 90, 156);
-                doc.text("ARSIP HASIL UJIAN", pageWidth/2, y, {align:'center'});
-                y += 15;
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(0, 90, 156);
+                doc.text("ARSIP HASIL UJIAN", pageWidth/2, y, {align:'center'}); y += 15;
                 
                 doc.setFontSize(10); doc.setTextColor(0); doc.setFont('helvetica', 'normal');
                 doc.text(`Nama: ${globalSubmissionData.studentName || 'Siswa'}`, margin, y); y+=5;
@@ -401,8 +346,7 @@
                     doc.setFont('helvetica', 'bold');
                     const qText = `${index + 1}. ${q.questionText.replace(/<[^>]*>?/gm, '')}`;
                     const splitTitle = doc.splitTextToSize(qText, pageWidth-(margin*2));
-                    doc.text(splitTitle, margin, y);
-                    y += (splitTitle.length * 5) + 3;
+                    doc.text(splitTitle, margin, y); y += (splitTitle.length * 5) + 3;
 
                     doc.setFont('helvetica', 'normal');
                     q.options.forEach((opt, i) => {
@@ -413,13 +357,11 @@
                         
                         doc.setTextColor(color[0], color[1], color[2]);
                         const optText = doc.splitTextToSize(`${String.fromCharCode(65+i)}. ${opt}`, pageWidth-(margin*2)-10);
-                        doc.text(prefix, margin+2, y);
-                        doc.text(optText, margin+25, y);
+                        doc.text(prefix, margin+2, y); doc.text(optText, margin+25, y);
                         y += (optText.length * 5) + 1;
                     });
                     doc.setTextColor(0); y+=5;
                 });
-                
                 doc.save(`Arsip_${globalQuizData.title}.pdf`);
             } catch (err) { console.error(err); alert("PDF Error"); }
             finally { if(typeof hideLoading === 'function') hideLoading(); }
