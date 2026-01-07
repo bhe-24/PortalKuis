@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Kuis - Admin</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <a href="dashboard.html" class="btn btn-secondary btn-sm" style="width: auto; margin-bottom: 20px; display: inline-block; text-decoration: none;">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+
+        <div class="header">
+            <h2>Manajemen Kuis</h2>
+        </div>
+
+        <div id="list-section">
+            <h3>Daftar Kuis Tersedia</h3>
+            <div id="quiz-list-admin">Memuat...</div>
+        </div>
+
+        <hr style="margin: 30px 0;">
+
+        <div id="create-section">
+            <h3><i class="fa-solid fa-plus-circle"></i> Buat Kuis Baru</h3>
+            
+            <form id="form-quiz">
+                <div class="form-group">
+                    <label>Judul Kuis</label>
+                    <input type="text" id="quiz-title" required placeholder="Contoh: Ujian Harian Sastra">
+                </div>
+                <div class="form-group">
+                    <label>Mata Pelajaran</label>
+                    <input type="text" id="quiz-subject" required placeholder="Contoh: Bahasa Indonesia">
+                </div>
+                <div class="form-group">
+                    <label>Durasi (Menit)</label>
+                    <input type="number" id="quiz-duration" required placeholder="Contoh: 60">
+                </div>
+
+                <div style="margin-top: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+                    <h4 style="margin-top:0;">Input Soal</h4>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button type="button" id="btn-tab-manual" class="btn btn-primary btn-sm">Input Manual</button>
+                        <button type="button" id="btn-tab-bulk" class="btn btn-secondary btn-sm">Input Massal (Cepat)</button>
+                    </div>
+
+                    <div id="tab-manual">
+                        <div class="form-group">
+                            <label>Pertanyaan</label>
+                            <textarea id="q-text" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Opsi Jawaban (Pilih Kunci Jawaban)</label>
+                            <div class="question-option">
+                                <input type="radio" name="correct" value="0" checked>
+                                <input type="text" class="opt-input" placeholder="Opsi A">
+                            </div>
+                            <div class="question-option">
+                                <input type="radio" name="correct" value="1">
+                                <input type="text" class="opt-input" placeholder="Opsi B">
+                            </div>
+                            <div class="question-option">
+                                <input type="radio" name="correct" value="2">
+                                <input type="text" class="opt-input" placeholder="Opsi C">
+                            </div>
+                            <div class="question-option">
+                                <input type="radio" name="correct" value="3">
+                                <input type="text" class="opt-input" placeholder="Opsi D">
+                            </div>
+                        </div>
+                        <button type="button" id="btn-add-manual" class="btn btn-secondary" style="width: auto;">+ Tambah ke Daftar</button>
+                    </div>
+
+                    <div id="tab-bulk" class="hidden">
+                        <p style="font-size: 0.9em; color: gray;">
+                            Format: Baris 1 Soal, Baris 2-5 Opsi. Beri tanda bintang (*) pada jawaban benar. Pisahkan soal dengan baris kosong (Enter 2x).
+                        </p>
+                        <textarea id="bulk-text" rows="10" placeholder="1. Siapa presiden pertama?
+A. Soeharto
+*B. Soekarno
+C. Habibie
+D. Jokowi" style="width: 100%; padding: 10px; font-family: monospace;"></textarea>
+                        <button type="button" id="btn-process-bulk" class="btn btn-secondary" style="width: auto; margin-top: 10px;">Proses Teks</button>
+                    </div>
+
+                    <div id="preview-questions" style="margin-top: 20px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
+                        <strong>Soal Siap Simpan: <span id="q-count">0</span></strong>
+                        <ul id="q-list" style="max-height: 200px; overflow-y: auto; font-size: 0.9em;"></ul>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="submit" class="btn btn-success">SIMPAN KUIS SEKARANG</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <div id="loading-overlay" class="hidden"><div class="progress-spinner"></div><p>Menyimpan...</p></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/admin-quiz.js"></script> </body>
+</html>
