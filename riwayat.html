@@ -4,83 +4,226 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Nilai - Cendekia Aksara</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
-        /* CSS Khusus Tabel Riwayat */
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-soft); }
-        .history-table th { background: var(--primary); color: white; padding: 15px; text-align: left; }
-        .history-table td { padding: 15px; border-bottom: 1px solid #eee; color: var(--text-main); }
+        /* --- CSS KHUSUS HALAMAN INI --- */
+
+        /* Request Kakak: Teks Kuning */
+        .subtitle-yellow {
+            color: #ffe082 !important; /* Kuning Emas Terang */
+            font-weight: 500;
+            margin-top: 5px;
+            font-size: 1em;
+        }
+
+        /* Tabel Riwayat */
+        .history-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 2px solid #eee;
+        }
+
+        .history-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f1f1;
+            color: #555;
+            vertical-align: middle;
+        }
+
         .history-table tr:last-child td { border-bottom: none; }
-        .score-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; color: white; font-weight: 600; font-size: 0.9em; }
-        .score-good { background: var(--success); }
-        .score-bad { background: var(--danger); }
+        .history-table tr:hover { background-color: #fcfcfc; }
+
+        /* Badge Nilai */
+        .score-pill {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9em;
+            min-width: 40px;
+            text-align: center;
+        }
+        .score-high { background: #e6f7ec; color: #28a745; border: 1px solid #28a745; }
+        .score-mid  { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .score-low  { background: #fdeeee; color: #dc3545; border: 1px solid #dc3545; }
+
+        /* State Kosong/Loading */
+        .state-box {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+        .state-box i { font-size: 3em; margin-bottom: 15px; color: #ddd; }
     </style>
 </head>
 <body>
+
     <nav class="navbar">
         <div class="container nav-container">
             <div class="nav-brand">
                 <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
                 <span class="brand-name">Cendekia Aksara</span>
             </div>
-            <a href="dashboard.html" class="btn-logout" style="color: var(--text-main); border-color: #ddd;">
+            <a href="dashboard.html" class="btn-logout" style="color: #333; border-color: #ddd;">
                 <i class="fa-solid fa-arrow-left"></i> Kembali
             </a>
         </div>
     </nav>
 
     <div class="container dashboard-content">
-        <div class="welcome-banner" style="padding: 30px;">
+        
+        <div class="welcome-banner" style="padding: 35px;">
             <div class="welcome-text">
-                <h1>Riwayat Belajar</h1>
-                <p class="subtitle">Rekap hasil ujian yang telah Anda kerjakan.</p>
+                <h1 style="margin: 0;">Riwayat Belajar</h1>
+                <p class="subtitle-yellow">Rekap hasil ujian yang telah Anda kerjakan.</p>
             </div>
-            <div class="welcome-icon"><i class="fa-solid fa-file-invoice"></i></div>
+            <div class="welcome-icon">
+                <i class="fa-solid fa-file-invoice"></i>
+            </div>
         </div>
 
         <div id="history-container">
-            <p style="text-align:center;">Memuat data...</p>
+            <div class="state-box">
+                <div class="spinner" style="margin: 0 auto 10px auto; border-color: #ccc; border-top-color: #005a9c;"></div>
+                <p>Sedang mengambil data nilai...</p>
+            </div>
         </div>
+
     </div>
 
     <script src="js/config.js"></script>
     <script>
-        // JS Khusus Riwayat (Internal saja biar cepat)
+        // Logika Internal Halaman Riwayat
         auth.onAuthStateChanged(async user => {
-            if(!user) window.location.href = 'index.html';
-            
-            const container = document.getElementById('history-container');
-            const snap = await db.collection('quiz_submissions')
-                .where('studentUid', '==', user.uid)
-                .orderBy('submittedAt', 'desc')
-                .get();
-
-            if (snap.empty) {
-                container.innerHTML = '<div style="text-align:center; padding:40px; background:white; border-radius:15px;"><i class="fa-solid fa-box-open" style="font-size:3em; color:#ddd;"></i><p>Belum ada riwayat ujian.</p></div>';
+            if (!user) {
+                window.location.href = 'index.html';
                 return;
             }
 
-            let html = '<table class="history-table"><thead><tr><th>Judul Kuis</th><th>Tanggal</th><th>Nilai</th><th>Status</th></tr></thead><tbody>';
-            
-            snap.forEach(doc => {
-                const data = doc.data();
-                const date = data.submittedAt ? data.submittedAt.toDate().toLocaleDateString('id-ID') : '-';
-                const badgeClass = data.score >= 70 ? 'score-good' : 'score-bad';
-                const status = data.score >= 70 ? 'Lulus' : 'Remedial';
+            const container = document.getElementById('history-container');
+
+            try {
+                console.log("Mengambil data untuk user:", user.uid);
+
+                // Ambil data dari Firebase (quiz_submissions)
+                const snapshot = await db.collection('quiz_submissions')
+                    .where('studentUid', '==', user.uid)
+                    .orderBy('submittedAt', 'desc') // Urutkan dari yang terbaru
+                    .get();
+
+                // 1. JIKA DATA KOSONG
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="history-card state-box">
+                            <i class="fa-solid fa-box-open"></i>
+                            <h3>Belum Ada Riwayat</h3>
+                            <p>Anda belum mengerjakan kuis apapun.</p>
+                            <a href="kuis-daftar.html" class="btn btn-primary" style="display:inline-block; width:auto; margin-top:10px;">
+                                Cari Kuis Baru
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 2. JIKA DATA ADA -> RENDER TABEL
+                let tableHTML = `
+                    <div class="history-card">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Judul Kuis</th>
+                                    <th>Tanggal</th>
+                                    <th>Nilai</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    
+                    // Format Tanggal
+                    let dateStr = '-';
+                    if (data.submittedAt) {
+                        dateStr = data.submittedAt.toDate().toLocaleDateString('id-ID', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+
+                    // Tentukan Warna Badge Nilai
+                    let badgeClass = 'score-low';
+                    let statusText = 'Remedial';
+                    
+                    if (data.score >= 80) {
+                        badgeClass = 'score-high';
+                        statusText = 'Lulus (A)';
+                    } else if (data.score >= 60) {
+                        badgeClass = 'score-mid';
+                        statusText = 'Lulus (B)';
+                    }
+
+                    tableHTML += `
+                        <tr>
+                            <td>
+                                <strong>${data.quizTitle}</strong>
+                                <div style="font-size:0.8em; color:#888;">ID: ${data.quizId}</div>
+                            </td>
+                            <td>${dateStr}</td>
+                            <td>
+                                <span class="score-pill ${badgeClass}">${data.score}</span>
+                            </td>
+                            <td>${statusText}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `</tbody></table></div>`;
+                container.innerHTML = tableHTML;
+
+            } catch (error) {
+                console.error("Error ambil riwayat:", error);
                 
-                html += `<tr>
-                    <td><strong>${data.quizTitle}</strong></td>
-                    <td>${date}</td>
-                    <td><span class="score-badge ${badgeClass}">${data.score}</span></td>
-                    <td>${status}</td>
-                </tr>`;
-            });
-            html += '</tbody></table>';
-            container.innerHTML = html;
+                // Tampilan Error jika Indeks Firebase belum dibuat atau koneksi putus
+                let errorMsg = "Gagal memuat data.";
+                if (error.message.includes("index")) {
+                    errorMsg = "Sistem sedang mengindeks data. Coba refresh 1-2 menit lagi.";
+                }
+
+                container.innerHTML = `
+                    <div class="state-box" style="color: #dc3545;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <h3>Terjadi Kesalahan</h3>
+                        <p>${errorMsg}</p>
+                        <button onclick="window.location.reload()" class="btn btn-secondary" style="width:auto; margin-top:10px;">Coba Lagi</button>
+                    </div>
+                `;
+            }
         });
     </script>
 </body>
