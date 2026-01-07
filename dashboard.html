@@ -12,62 +12,80 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray">
 
     <nav class="navbar">
-        <div class="nav-brand">
-            <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
-            <span class="nav-title">Cendekia Aksara</span>
+        <div class="container nav-container">
+            <div class="nav-brand">
+                <img src="https://imgur.com/5Srjyo4.png" alt="Logo" class="nav-logo">
+                <div class="nav-text">
+                    <span class="brand-name">Cendekia Aksara</span>
+                    <span class="brand-sub">Portal Siswa</span>
+                </div>
+            </div>
+            <button id="btn-logout" class="btn-logout">
+                <i class="fa-solid fa-power-off"></i> <span class="hide-mobile">Keluar</span>
+            </button>
         </div>
-        <button id="btn-logout" class="btn-logout-nav">
-            <i class="fa-solid fa-right-from-bracket"></i> <span class="logout-text">Keluar</span>
-        </button>
     </nav>
 
-    <div class="container dashboard-container">
+    <main class="container dashboard-content">
         
-        <div class="welcome-section">
-            <p class="date-display" id="date-display">Senin, 1 Januari 2024</p>
-            <h1 id="student-name">Halo, Siswa...</h1>
-            <p class="subtitle">Siap untuk belajar hal baru hari ini?</p>
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <p id="date-display" class="date-text">Memuat tanggal...</p>
+                <h1 id="student-name">Halo, Siswa!</h1>
+                <p class="subtitle">Siap untuk mencetak prestasi hari ini?</p>
+            </div>
+            <div class="welcome-icon">
+                <i class="fa-solid fa-user-graduate"></i>
+            </div>
         </div>
 
-        <div class="dashboard-grid">
+        <div class="menu-grid">
             
-            <a href="kuis-daftar.html" class="menu-card card-blue">
-                <div class="card-icon"><i class="fa-solid fa-pen-to-square"></i></div>
-                <div class="card-text">
-                    <h3>Daftar Kuis</h3>
-                    <p>Kerjakan tugas & ujian yang tersedia.</p>
+            <a href="kuis-daftar.html" class="menu-item blue">
+                <div class="icon-box">
+                    <i class="fa-solid fa-pencil"></i>
                 </div>
-                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="text-box">
+                    <h3>Daftar Kuis</h3>
+                    <p>Kerjakan tugas & ujian baru</p>
+                </div>
+                <div class="arrow-box">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
             </a>
 
-            <div class="menu-card card-purple" onclick="alert('Fitur Arsip Nilai sedang dalam pengembangan!')">
-                <div class="card-icon"><i class="fa-solid fa-trophy"></i></div>
-                <div class="card-text">
-                    <h3>Lihat Nilai</h3>
-                    <p>Cek riwayat hasil belajarmu.</p>
+            <div class="menu-item purple" onclick="alert('Segera Hadir!')">
+                <div class="icon-box">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
                 </div>
-                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="text-box">
+                    <h3>Riwayat Nilai</h3>
+                    <p>Lihat hasil belajarmu</p>
+                </div>
+                <div class="arrow-box">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
             </div>
 
-            <div class="menu-card card-orange" onclick="alert('Fitur Profil sedang dalam pengembangan!')">
-                <div class="card-icon"><i class="fa-solid fa-user-graduate"></i></div>
-                <div class="card-text">
-                    <h3>Profil Saya</h3>
-                    <p>Data diri dan pengaturan akun.</p>
+             <div class="menu-item orange" onclick="alert('Segera Hadir!')">
+                <div class="icon-box">
+                    <i class="fa-solid fa-id-card"></i>
                 </div>
-                <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                <div class="text-box">
+                    <h3>Profil Saya</h3>
+                    <p>Pengaturan akun</p>
+                </div>
+                <div class="arrow-box">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
             </div>
 
         </div>
-    </div>
 
-    <div id="loading-overlay" class="hidden">
-        <div class="spinner"></div>
-        <p>Memuat Profil...</p>
-    </div>
+    </main>
 
     <script src="js/config.js"></script>
     <script src="js/dashboard.js"></script>
