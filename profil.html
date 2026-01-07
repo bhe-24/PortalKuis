@@ -12,79 +12,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
-        /* CSS KHUSUS HALAMAN PROFIL */
-        
-        /* Layout Grid: Kiri Avatar, Kanan Form */
+        /* LAYOUT PROFIL */
         .profile-container {
-            background: white;
-            border-radius: 20px;
+            background: white; border-radius: 20px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            padding: 40px;
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
-            margin-top: 20px;
+            padding: 40px; display: flex; gap: 40px;
+            align-items: flex-start; margin-top: 20px;
         }
-
-        /* Bagian Avatar (Kiri) */
-        .avatar-section {
-            flex: 1; /* Lebar 1 bagian */
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
+        .avatar-section { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
         .avatar-box {
-            width: 180px; height: 180px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 5px solid #f0f0f0;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            background-color: #e3f2fd;
-            transition: 0.3s;
+            width: 180px; height: 180px; border-radius: 50%;
+            overflow: hidden; border: 5px solid #f0f0f0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 20px;
+            background-color: #e3f2fd; transition: 0.3s;
         }
-        
         .avatar-box:hover { border-color: var(--primary); transform: scale(1.05); }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-
+        
         .role-badge {
             background: var(--primary); color: white;
             padding: 5px 15px; border-radius: 50px;
-            font-size: 0.9em; font-weight: 600;
-            margin-top: 10px; display: inline-block;
+            font-size: 0.9em; font-weight: 600; margin-top: 10px; display: inline-block;
         }
-
-        /* Bagian Form (Kanan) */
-        .form-section {
-            flex: 2; /* Lebar 2 bagian (lebih luas) */
-        }
-
-        /* Label Form yang lebih rapi */
-        .form-group label {
-            font-size: 0.9em; color: #666; font-weight: 500;
-        }
-
+        .form-section { flex: 2; }
+        .form-group label { font-size: 0.9em; color: #666; font-weight: 500; }
         .alert-box {
-            background: #fff3cd; color: #856404;
-            padding: 15px; border-radius: 10px;
-            border: 1px solid #ffeeba;
-            margin-bottom: 20px;
+            background: #fff3cd; color: #856404; padding: 15px;
+            border-radius: 10px; border: 1px solid #ffeeba; margin-bottom: 20px;
             font-size: 0.9em; display: flex; align-items: center; gap: 10px;
         }
 
-        /* RESPONSIF HP: Avatar Pindah ke Atas */
         @media (max-width: 768px) {
-            .profile-container {
-                flex-direction: column; /* Tumpuk ke bawah */
-                padding: 25px;
-            }
-            .avatar-section {
-                width: 100%; margin-bottom: 20px;
-                border-bottom: 1px solid #eee; padding-bottom: 20px;
-            }
-            .avatar-box { width: 140px; height: 140px; }
+            .profile-container { flex-direction: column; padding: 25px; }
+            .avatar-section { width: 100%; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
             .form-section { width: 100%; }
         }
     </style>
@@ -107,7 +67,7 @@
         <div class="welcome-banner" style="background: linear-gradient(135deg, #43e97b, #38f9d7); padding: 30px;">
             <div class="welcome-text">
                 <h1 style="margin: 0;">Profil Saya</h1>
-                <p class="subtitle" style="color: #005a9c; opacity: 1;">Kelola data diri agar tetap update.</p>
+                <p class="subtitle" style="color: #005a9c; opacity: 1;">Pastikan data diri Anda sudah benar.</p>
             </div>
             <div class="welcome-icon"><i class="fa-solid fa-id-card-clip" style="color: rgba(255,255,255,0.4);"></i></div>
         </div>
@@ -116,29 +76,29 @@
             
             <div class="avatar-section">
                 <div class="avatar-box">
-                    <img id="avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=neutral" alt="Avatar">
+                    <img id="avatar-img" src="https://api.dicebear.com/7.x/bottts/svg?seed=loading" alt="Avatar">
                 </div>
-                <h3 id="display-name" style="margin: 0;">Siswa</h3>
+                <h3 id="display-name" style="margin: 0;">Memuat...</h3>
                 <span id="display-role" class="role-badge">SISWA</span>
-                <p style="font-size: 0.8em; color: gray; margin-top: 10px;">Avatar otomatis menyesuaikan jenis kelamin.</p>
+                <p style="font-size: 0.8em; color: gray; margin-top: 10px;">Avatar otomatis dari sistem.</p>
             </div>
 
             <div class="form-section">
                 
                 <div id="incomplete-alert" class="alert-box hidden">
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span><strong>Perhatian!</strong> Harap lengkapi Jenis Kelamin, Umur, dan Kelas.</span>
+                    <span><strong>Data Belum Lengkap!</strong> Harap isi Jenis Kelamin, Umur, dan Semester.</span>
                 </div>
 
                 <form id="profile-form">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
-                            <label>Email (Akun)</label>
-                            <input type="email" id="p-email" class="modal-input-field" disabled style="background:#f9f9f9; cursor:not-allowed;">
-                        </div>
-                        <div class="form-group">
                             <label>Nama Lengkap</label>
                             <input type="text" id="p-name" class="modal-input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email (Akun)</label>
+                            <input type="email" id="p-email" class="modal-input-field" disabled style="background:#f9f9f9; cursor:not-allowed;">
                         </div>
                     </div>
 
@@ -147,7 +107,7 @@
                     <div class="form-group">
                         <label>Jenis Kelamin <span style="color:red">*</span></label>
                         <select id="p-gender" class="modal-input-field" required onchange="updateAvatar(this.value)">
-                            <option value="" disabled selected>-- Pilih Jenis Kelamin --</option>
+                            <option value="" disabled selected>-- Pilih --</option>
                             <option value="Laki-laki">Laki-laki</option>
                             <option value="Perempuan">Perempuan</option>
                         </select>
@@ -156,21 +116,32 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="form-group">
                             <label>Umur (Tahun) <span style="color:red">*</span></label>
-                            <input type="number" id="p-age" class="modal-input-field" placeholder="Contoh: 16" required min="5" max="99">
+                            <input type="number" id="p-age" class="modal-input-field" placeholder="Contoh: 17" required min="5" max="99">
                         </div>
+                        
                         <div class="form-group">
-                            <label>Kelas / Tingkat <span style="color:red">*</span></label>
-                            <input type="text" id="p-class" class="modal-input-field" placeholder="Contoh: XII IPA 1" required>
+                            <label>Semester Saat Ini <span style="color:red">*</span></label>
+                            <select id="p-semester" class="modal-input-field" required>
+                                <option value="" disabled selected>-- Pilih Semester --</option>
+                                <option value="Semester 1">Semester 1</option>
+                                <option value="Semester 2">Semester 2</option>
+                                <option value="Semester 3">Semester 3</option>
+                                <option value="Semester 4">Semester 4</option>
+                                <option value="Semester 5">Semester 5</option>
+                                <option value="Semester 6">Semester 6</option>
+                                <option value="Semester 7">Semester 7</option>
+                                <option value="Semester 8">Semester 8</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Alamat / Kota</label>
-                        <input type="text" id="p-address" class="modal-input-field" placeholder="Contoh: Jakarta Selatan">
+                        <input type="text" id="p-address" class="modal-input-field" placeholder="Contoh: Yogyakarta">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="margin-top: 10px; width: 100%;">
-                        <i class="fa-solid fa-floppy-disk"></i> SIMPAN PERUBAHAN
+                        <i class="fa-solid fa-floppy-disk"></i> SIMPAN PERMANEN
                     </button>
                 </form>
             </div>
@@ -182,41 +153,44 @@
     <script>
         let uid = null;
         
-        // Cek Login & Ambil Data
         auth.onAuthStateChanged(async user => {
             if(!user) { window.location.href = 'index.html'; return; }
             uid = user.uid;
             
-            showLoading(); // Efek Blur Loading
+            showLoading(); // Blur Effect
 
             try {
                 const doc = await db.collection('users').doc(uid).get();
                 if(doc.exists) {
                     const data = doc.data();
                     
-                    // Isi Form dari Database
+                    // Isi Form
                     document.getElementById('p-email').value = data.email || '';
                     document.getElementById('p-name').value = data.name || '';
-                    document.getElementById('p-role').textContent = (data.role || 'SISWA').toUpperCase();
                     document.getElementById('display-name').textContent = data.name || 'Siswa';
+                    document.getElementById('display-role').textContent = (data.role || 'SISWA').toUpperCase();
 
-                    // Isi Data Tambahan (Jika ada)
+                    // Load Data Tersimpan (Permanen)
                     if(data.gender) document.getElementById('p-gender').value = data.gender;
                     if(data.age) document.getElementById('p-age').value = data.age;
-                    if(data.class_room) document.getElementById('p-class').value = data.class_room; // class_room biar beda sama keyword class JS
                     if(data.address) document.getElementById('p-address').value = data.address;
+                    
+                    // Load Semester
+                    if(data.semester) {
+                        document.getElementById('p-semester').value = data.semester;
+                    }
 
-                    // Update Avatar sesuai data gender
+                    // Update Avatar
                     updateAvatar(data.gender);
 
-                    // CEK DATA WAJIB: Jika kosong, munculkan Pop-up Peringatan
-                    if (!data.gender || !data.age || !data.class_room) {
+                    // Cek Kelengkapan Data (Wajib Semester, Umur, Gender)
+                    if (!data.gender || !data.age || !data.semester) {
                         document.getElementById('incomplete-alert').classList.remove('hidden');
                         
-                        // POP UP BLUR WAJIB ISI
+                        // POP UP WAJIB ISI
                         await showAlert(
-                            "Data Belum Lengkap", 
-                            "Halo! Mohon lengkapi data <b>Jenis Kelamin, Umur, dan Kelas</b> sebelum melanjutkan aktivitas.", 
+                            "Lengkapi Profil", 
+                            "Mohon lengkapi data <b>Jenis Kelamin, Umur, dan Semester</b> agar data Anda tersimpan permanen.", 
                             "info"
                         );
                     }
@@ -229,56 +203,58 @@
             }
         });
 
-        // Fungsi Ganti Kartun Avatar (Dipanggil saat Load & saat Pilih Gender)
+        // FUNGSI AVATAR BARU (FIX PEREMPUAN)
         function updateAvatar(gender) {
             const imgEl = document.getElementById('avatar-img');
-            let seed = uid ? uid.substring(0, 5) : 'random'; // Biar gambarnya konsisten per user
+            // Gunakan UID sebagai seed agar gambar konsisten per user
+            let seed = uid ? uid : 'randomseed'; 
             
             if (gender === 'Laki-laki') {
-                // Kartun Cowok
-                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&gender=male&style=circle`;
+                // Cowok: Rambut pendek
+                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&top=shortHair,shortFlat,shortRound,shavedSides&hairColor=2c1b18`;
             } else if (gender === 'Perempuan') {
-                // Kartun Cewek
-                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&gender=female&style=circle`;
+                // Cewek: Rambut Panjang (Dipaksa pakai parameter 'top')
+                imgEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&top=longHair,straight01,straight02,bun,curvy&hairColor=2c1b18&clothe=blazerAndShirt`;
             } else {
-                // Netral (Robot Lucu)
+                // Netral
                 imgEl.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
             }
         }
 
-        // Simpan Data
+        // SIMPAN PERMANEN
         document.getElementById('profile-form').onsubmit = async (e) => {
             e.preventDefault();
             
             const name = document.getElementById('p-name').value;
             const gender = document.getElementById('p-gender').value;
             const age = document.getElementById('p-age').value;
-            const classRoom = document.getElementById('p-class').value;
+            const semester = document.getElementById('p-semester').value;
             const address = document.getElementById('p-address').value;
 
-            const yakin = await showConfirm("Simpan Profil", "Pastikan data yang Anda masukkan sudah benar.");
+            const yakin = await showConfirm("Simpan Permanen?", "Data yang disimpan akan menjadi data tetap Anda.");
             
             if(yakin) {
                 showLoading();
                 try {
+                    // Update ke Firebase (Permanen)
                     await db.collection('users').doc(uid).update({ 
                         name: name,
                         gender: gender,
                         age: age,
-                        class_room: classRoom,
+                        semester: semester, // Simpan Semester
                         address: address
                     });
                     
-                    // Update tampilan langsung
                     document.getElementById('display-name').textContent = name;
-                    document.getElementById('incomplete-alert').classList.add('hidden'); // Sembunyikan alert jika sudah lengkap
+                    document.getElementById('incomplete-alert').classList.add('hidden');
+                    updateAvatar(gender); // Refresh avatar sesuai gender baru
                     
                     hideLoading();
-                    await showAlert("Berhasil", "Data profil berhasil diperbarui!", "success");
+                    await showAlert("Tersimpan!", "Data profil Anda aman dan tersimpan selamanya.", "success");
                     
                 } catch (err) {
                     hideLoading();
-                    showAlert("Gagal", "Terjadi kesalahan saat menyimpan.", "error");
+                    showAlert("Gagal", "Terjadi kesalahan koneksi.", "error");
                 }
             }
         }
