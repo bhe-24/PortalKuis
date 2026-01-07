@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/style.css">
 
     <style>
-        /* CSS Khusus Halaman Profil (Tema Soft Aura) */
+        /* --- STYLE KHUSUS PROFIL --- */
         body { 
             background-color: #f0f2f5; 
             min-height: 100vh; 
@@ -41,7 +41,7 @@
             100% { transform: translate(30px, 50px) scale(1.1); }
         }
 
-        /* Navbar Sederhana */
+        /* Navbar */
         .simple-nav {
             padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
             position: absolute; top: 0; width: 100%; box-sizing: border-box; z-index: 10;
@@ -53,81 +53,81 @@
         }
         .btn-back-dash:hover { color: #005a9c; }
 
-        /* Container Profile */
+        /* Kartu Profil */
         .profile-container {
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 80px 20px 40px 20px;
         }
-
         .profile-card {
             background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.6);
             width: 100%; max-width: 800px;
             border-radius: 24px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05);
-            overflow: hidden;
-            display: flex; flex-direction: column;
+            overflow: hidden; display: flex; flex-direction: column;
         }
-
-        /* Header Profile (Cover) */
-        .p-header {
-            height: 150px; background: linear-gradient(135deg, #005a9c, #4facfe);
-            position: relative;
-        }
-        
-        /* Foto & Info Utama */
-        .p-body {
-            padding: 0 40px 40px 40px; position: relative; text-align: center;
-        }
+        .p-header { height: 150px; background: linear-gradient(135deg, #005a9c, #4facfe); position: relative; }
+        .p-body { padding: 0 40px 40px 40px; position: relative; text-align: center; }
         .p-avatar {
             width: 140px; height: 140px; border-radius: 50%;
             border: 5px solid white; background: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin: -70px auto 15px auto; position: relative;
-            object-fit: cover;
+            margin: -70px auto 15px auto; position: relative; object-fit: cover;
         }
-        
         .p-name { font-size: 1.8em; font-weight: 700; color: #333; margin: 0; }
         .p-email { color: #777; margin-bottom: 20px; }
-        .p-role-badge { 
-            background: #e3f2fd; color: #005a9c; padding: 5px 15px; 
-            border-radius: 50px; font-size: 0.85em; font-weight: 600;
-        }
+        .p-role-badge { background: #e3f2fd; color: #005a9c; padding: 5px 15px; border-radius: 50px; font-size: 0.85em; font-weight: 600; }
 
-        /* Grid Info Detail */
-        .p-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
-            margin-top: 30px; text-align: left;
-        }
+        .p-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; text-align: left; }
         .p-item { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
         .p-label { display: block; font-size: 0.85em; color: #999; margin-bottom: 5px; font-weight: 600; }
         .p-val { font-size: 1.1em; color: #333; font-weight: 500; }
         .p-icon { color: #005a9c; margin-right: 8px; }
 
-        /* Form Edit (Hidden by default) */
+        /* Form Edit */
         .edit-form { display: none; margin-top: 20px; text-align: left; }
         .form-group { margin-bottom: 15px; }
-        .form-input { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; 
-            border-radius: 10px; box-sizing: border-box; font-family: inherit;
-        }
+        .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
 
         /* Tombol */
-        .btn-action {
-            padding: 12px 25px; border-radius: 50px; border: none; cursor: pointer;
-            font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
-        }
+        .btn-action { padding: 12px 25px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: #005a9c; color: white; box-shadow: 0 5px 15px rgba(0,90,156,0.3); }
         .btn-primary:hover { transform: translateY(-2px); background: #004a80; }
-        
         .btn-danger { background: #ffebee; color: #d32f2f; }
         .btn-danger:hover { background: #ffcdd2; }
 
-        .loading-overlay {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: white; z-index: 50; display: flex; 
-            justify-content: center; align-items: center; flex-direction: column;
+        /* Loading */
+        .loading-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: white; z-index: 50; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+
+        /* --- CUSTOM MODAL POPUP (NEW) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            z-index: 100; display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
         }
+        .modal-overlay.active { opacity: 1; }
+
+        .modal-box {
+            background: white; width: 90%; max-width: 400px;
+            padding: 30px; border-radius: 20px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+
+        .modal-icon { font-size: 3em; margin-bottom: 15px; }
+        .icon-success { color: #28a745; }
+        .icon-error { color: #dc3545; }
+        .icon-confirm { color: #ffc107; }
+
+        .modal-title { font-size: 1.4em; font-weight: 700; color: #333; margin: 0 0 10px 0; }
+        .modal-msg { color: #666; margin-bottom: 25px; font-size: 0.95em; line-height: 1.5; }
+
+        .modal-actions { display: flex; justify-content: center; gap: 10px; }
+        .btn-modal { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; flex: 1; }
+        .btn-modal-primary { background: #005a9c; color: white; }
+        .btn-modal-cancel { background: #eee; color: #555; }
 
         @media (max-width: 768px) {
             .p-grid { grid-template-columns: 1fr; }
@@ -141,6 +141,16 @@
     <div class="animated-bg">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
+    </div>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="m-icon" class="modal-icon"></div>
+            <h3 id="m-title" class="modal-title">Judul</h3>
+            <p id="m-msg" class="modal-msg">Pesan...</p>
+            <div id="m-actions" class="modal-actions">
+                </div>
+        </div>
     </div>
 
     <nav class="simple-nav">
@@ -202,7 +212,6 @@
 
                 <div id="edit-mode" class="edit-form">
                     <h3 style="margin-top:0;">Edit Biodata</h3>
-                    
                     <div class="form-group">
                         <label class="p-label">Nama Lengkap</label>
                         <input type="text" id="edit-name" class="form-input">
@@ -229,7 +238,6 @@
                         <label class="p-label">Alamat</label>
                         <textarea id="edit-address" class="form-input" rows="3"></textarea>
                     </div>
-
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <button onclick="saveProfile()" class="btn-action btn-primary">
                             <i class="fa-solid fa-save"></i> Simpan
@@ -245,5 +253,6 @@
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/profile.js"></script> </body>
+    <script src="js/profile.js"></script>
+</body>
 </html>
